@@ -29,7 +29,11 @@ Before = v2 screen at the same step (screens-v2), After = this file.
 | 23-wizard.png | Booking wizard with plain mode tiles and explanations | ../screens-v2/30-wizard-1.png |
 | 24-dark-start.png | Dark mode (next-themes) | new in v3 |
 | 25-dark-shipment.png | Dark mode shipment journey | new in v3 |
-| 26-mobile-start.png | 390px mobile, no horizontal overflow | new in v3 |
-| 27-mobile-shipments.png | 390px mobile, no horizontal overflow | new in v3 |
-| 28-mobile-shipment.png | 390px mobile, no horizontal overflow | new in v3 |
-| 29-mobile-scan.png | 390px mobile, no horizontal overflow | ../screens-v2/48-mobile-scan-offline.png |
+| 26-login-try-demo.png | QA-25: empty sign-in with placeholders and a 'Try the demo' button | ../screens-v2/01-login.png |
+| 27-tally-bulk.png | QA-16: tick packages, then set condition or weight, mark missing, or un-tally together | ../screens-v2/46-unloading-in-progress.png |
+| 28-packing-list-editable.png | QA-27: weights and shipping marks editable until the list is issued | ../screens-v2/17-mfg-packing-list.png |
+| 29-menu-by-role.png | QA-09: menu for one role (Warehouse) with 'Show all (Expert)' | ../screens-v2/05-dashboard-forwarder.png |
+| 30-mobile-start.png | 390px mobile, no horizontal overflow | new in v3 |
+| 31-mobile-shipments.png | 390px mobile, no horizontal overflow | new in v3 |
+| 32-mobile-shipment.png | 390px mobile, no horizontal overflow | new in v3 |
+| 33-mobile-scan.png | 390px mobile, no horizontal overflow | ../screens-v2/48-mobile-scan-offline.png |
