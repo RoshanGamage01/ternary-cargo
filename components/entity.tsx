@@ -137,7 +137,8 @@ export function EntityTable({ name, cols, extraActions, hideNew, presetFilter, c
   const saved = views[def.key] ?? [];
   const [viewId, setViewId] = useState("all"); const [q, setQ] = useState(""); const [st, setSt] = useState("All");
   const [sorting, setSorting] = useState<SortingState>([]); const [sel, setSel] = useState<RowSelectionState>({});
-  const [vis, setVis] = useState<VisibilityState>({}); const [layout, setLayout] = useState<"table" | "cards">("table"); const [dense, setDense] = useState(false);
+  const [vis, setVis] = useState<VisibilityState>({}); const [layout, setLayout] = useState<"table" | "cards">("table");
+  useEffect(() => { if (window.matchMedia("(max-width: 639px)").matches) setLayout("cards"); }, []); const [dense, setDense] = useState(false);
   const [form, setForm] = useState<{ open: boolean; row?: Row }>({ open: !!openNew }); const [del, setDel] = useState<Row[] | null>(null); const [sheet, setSheet] = useState<Row | null>(null);
   const [loading, setLoading] = useState(true); const [saveOpen, setSaveOpen] = useState(false); const [vname, setVname] = useState("");
   useEffect(() => { const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
@@ -172,7 +173,7 @@ export function EntityTable({ name, cols, extraActions, hideNew, presetFilter, c
     </div>
     <div className="flex flex-wrap items-center gap-2 px-4 py-3 no-print">
       <div className="flex min-w-[220px] flex-1 items-center gap-2 rounded-xl border border-input bg-background px-3 py-2"><Search size={15} className="text-muted-foreground" /><input aria-label={`Search ${def.title}`} placeholder={`Search ${def.title.toLowerCase()}…`} value={q} onChange={e => { setQ(e.target.value); table.setPageIndex(0); }} className="w-full bg-transparent text-sm outline-none" />{q && <button aria-label="Clear search" onClick={() => setQ("")}><X size={14} /></button>}</div>
-      {promoted.length > 0 && <div className="hidden items-center gap-1 md:flex">{["All", ...promoted].map(s => <button key={s} onClick={() => { setSt(s); table.setPageIndex(0); }} className={cn("rounded-full px-3 py-1.5 text-xs font-medium ring-1 ring-inset", st === s ? "bg-primary text-primary-foreground ring-primary" : "ring-border hover:bg-muted")}>{s}</button>)}</div>}
+      {promoted.length > 0 && <div className="hidden items-center gap-1 md:flex">{["All", ...promoted].map(s => <button key={s} aria-pressed={st === s} onClick={() => { setSt(s); table.setPageIndex(0); }} className={cn("rounded-full px-3 py-1.5 text-xs font-medium ring-1 ring-inset", st === s ? "bg-primary text-primary-foreground ring-primary" : "ring-border hover:bg-muted")}>{s}</button>)}</div>}
       {def.statuses.length > 0 && <select aria-label="Filter by status" value={st} onChange={e => { setSt(e.target.value); table.setPageIndex(0); }} className="h-9 rounded-xl border border-input bg-card px-3 text-sm"><option>All</option>{def.statuses.map(s => <option key={s}>{s}</option>)}</select>}
       <Popover><PopoverTrigger asChild><Button variant="outline"><SlidersHorizontal size={15} />Display</Button></PopoverTrigger><PopoverContent align="end" className="w-72 space-y-4">
         <div><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Layout</p><div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">{(["table", "cards"] as const).map(l => <button key={l} onClick={() => setLayout(l)} aria-pressed={layout === l} className={cn("flex items-center justify-center gap-1.5 rounded-md py-1.5 text-sm capitalize", layout === l && "bg-card shadow-sm")}>{l === "table" ? <Rows3 size={14} /> : <LayoutGrid size={14} />}{l}</button>)}</div></div>

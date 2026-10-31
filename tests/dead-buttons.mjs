@@ -13,8 +13,8 @@ async function prep(r) {
   // pre-seed manufacturing state so downstream screens have pallets
 }
 // seed manufacturing data by real clicks
-await prep("manufacturing/serialisation"); await p.getByRole("button",{name:"Generate labels"}).first().click(); await p.waitForTimeout(300); await p.click("text=Batch-verify all");
-await prep("manufacturing/palletising"); await p.click("text=Auto-build all"); await p.waitForTimeout(300);
+await prep("manufacturing/serialisation"); await p.getByRole("button",{name:"Generate labels"}).first().click(); await p.waitForTimeout(300); await p.getByRole("button", { name: "Batch-verify all" }).first().click();
+await prep("manufacturing/palletising"); await p.getByRole("button", { name: "Auto-build all" }).first().click(); await p.waitForTimeout(300);
 for (const r of routesRun) {
   await prep(r);
   const n = await p.locator("button:visible").count();
@@ -39,6 +39,6 @@ for (const r of routesRun) {
 console.log(`\nClicked ${total} buttons; dead: ${dead.length}`); dead.forEach(d => console.log("DEAD", d));
 if (!process.env.FLOWS) { await b.close(); process.exit(0); }
 // key flow assertions
-await prep("shipments/new"); for (let i = 0; i < 3; i++) await p.click("text=Continue"); await p.click("text=Create shipment"); await p.waitForURL(/shipments\/TC-SEA-/); console.log("OK wizard ->", p.url());
-await prep("verification"); await p.click("text=Save damage report"); await p.click("text=Tap to sign"); await p.click("text=Sign off with exception"); await p.fill('[aria-label="Exception reason"]', "Crushed carton, claim raised with carrier"); await p.selectOption('[aria-label="Second approver"]', { index: 1 }); await p.click("text=Confirm sign-off with exception"); await p.waitForSelector("text=Verified with exception"); console.log("OK verification sign-off");
+await prep("shipments/new"); for (let i = 0; i < 3; i++) await p.getByRole("button", { name: "Continue" }).first().click(); await p.getByRole("button", { name: "Create shipment" }).first().click(); await p.waitForURL(/shipments\/TC-SEA-/); console.log("OK wizard ->", p.url());
+await prep("verification"); await p.getByRole("button", { name: "Save damage report" }).first().click(); await p.getByRole("button", { name: "Tap to sign" }).first().click(); await p.getByRole("button", { name: "Sign off with exception" }).first().click(); await p.fill('[aria-label="Exception reason"]', "Crushed carton, claim raised with carrier"); await p.selectOption('[aria-label="Second approver"]', { index: 1 }); await p.getByRole("button", { name: "Confirm sign-off with exception" }).first().click(); await p.waitForSelector("text=Verified with exception"); console.log("OK verification sign-off");
 await b.close();
