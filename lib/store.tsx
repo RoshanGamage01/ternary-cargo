@@ -20,7 +20,7 @@ type Ctx = {
   extra: Record<string, Extra>; patchExtra: (key: string, f: (e: Extra) => Extra) => void; getExtra: (key: string) => Extra;
   customFields: Record<string, CustomField[]>; setCustomFields: (k: string, f: CustomField[]) => void;
   views: Record<string, SavedView[]>; setViews: (k: string, v: SavedView[]) => void;
-  expert: boolean; setExpert: (b: boolean) => void; dismissed: string[]; dismiss: (k: string) => void; undismiss: () => void;
+  expert: boolean; setExpert: (b: boolean) => void; role: string; setRole: (r: string) => void; dismissed: string[]; dismiss: (k: string) => void; undismiss: () => void;
   dark: boolean; setDark: (d: boolean) => void; palette: boolean; setPalette: (b: boolean) => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);
@@ -43,17 +43,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [extra, setExtra] = useState<Record<string, Extra>>({});
   const [customFields, setCF] = useState<Record<string, CustomField[]>>(seedCustom);
   const [views, setV] = useState<Record<string, SavedView[]>>(seedViews);
-  const [expert, setExpert] = useState(false);
+  const [expert, setExpert] = useState(false); const [role, setRole] = useState("Everyone");
   const [dismissed, setDismissed] = useState<string[]>([]);
   const { resolvedTheme, setTheme } = useTheme();
   const [notifs, setNotifs] = useState<Notif[]>(seedNotifs);
   const [events, setEvents] = useState<Ev[]>(seedEvents);
   const [palette, setPalette] = useState(false);
   useEffect(() => {
-    try { const s = localStorage.getItem(KEY); if (s) { const p = JSON.parse(s); setDb({ ...seed(), ...p.db }); if (p.notifs) setNotifs(p.notifs); if (p.events) setEvents(p.events); if (p.extra) setExtra(p.extra); if (p.customFields) setCF(p.customFields); if (p.views) setV(p.views); setExpert(!!p.expert); if (p.dismissed) setDismissed(p.dismissed); } } catch {}
+    try { const s = localStorage.getItem(KEY); if (s) { const p = JSON.parse(s); setDb({ ...seed(), ...p.db }); if (p.notifs) setNotifs(p.notifs); if (p.events) setEvents(p.events); if (p.extra) setExtra(p.extra); if (p.customFields) setCF(p.customFields); if (p.views) setV(p.views); setExpert(!!p.expert); if (p.role) setRole(p.role); if (p.dismissed) setDismissed(p.dismissed); } } catch {}
     setReady(true);
   }, []);
-  useEffect(() => { if (ready) localStorage.setItem(KEY, JSON.stringify({ db, notifs, events, extra, customFields, views, expert, dismissed })); }, [db, notifs, events, extra, customFields, views, expert, dismissed, ready]);
+  useEffect(() => { if (ready) localStorage.setItem(KEY, JSON.stringify({ db, notifs, events, extra, customFields, views, expert, role, dismissed })); }, [role, db, notifs, events, extra, customFields, views, expert, dismissed, ready]);
   const dark = resolvedTheme === "dark"; const setDarkS = (d: boolean) => setTheme(d ? "dark" : "light");
   const toast = useCallback((msg: string, tone: Toast["tone"] = "ok") => { if (tone === "err") sonner.error(msg); else if (tone === "info") sonner.info(msg); else sonner.success(msg); }, []);
   const notify = useCallback((text: string, href?: string) => setNotifs(n => [{ id: Date.now(), text, at: new Date().toTimeString().slice(0, 5), read: false, href }, ...n]), []);
@@ -65,7 +65,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const patchExtra = useCallback((key: string, f: (e: Extra) => Extra) => setExtra(x => ({ ...x, [key]: f(x[key] ?? emptyExtra()) })), []);
   const getExtra = (key: string) => extra[key] ?? emptyExtra();
   const reset = () => { localStorage.removeItem(KEY); setDb(seed()); setNotifs(seedNotifs()); setEvents(seedEvents()); setExtra({}); setCF(seedCustom()); setV(seedViews()); setDismissed([]); toast("Demo data reset"); };
-  return <C.Provider value={{ db, ready, add, update, remove, setMany, reset, toast, toasts, notifs, notify, events, log, markRead: () => setNotifs(n => n.map(x => ({ ...x, read: true }))), dark, setDark: setDarkS, palette, setPalette, extra, patchExtra, getExtra, customFields, setCustomFields: (k, f) => setCF(c => ({ ...c, [k]: f })), views, setViews: (k, v) => setV(c => ({ ...c, [k]: v })), expert, setExpert, dismissed, dismiss: k => setDismissed(d => [...d, k]), undismiss: () => setDismissed([]) }}>{children}</C.Provider>;
+  return <C.Provider value={{ role, setRole, db, ready, add, update, remove, setMany, reset, toast, toasts, notifs, notify, events, log, markRead: () => setNotifs(n => n.map(x => ({ ...x, read: true }))), dark, setDark: setDarkS, palette, setPalette, extra, patchExtra, getExtra, customFields, setCustomFields: (k, f) => setCF(c => ({ ...c, [k]: f })), views, setViews: (k, v) => setV(c => ({ ...c, [k]: v })), expert, setExpert, dismissed, dismiss: k => setDismissed(d => [...d, k]), undismiss: () => setDismissed([]) }}>{children}</C.Provider>;
 }
 export const useStore = () => useContext(C);
 export function downloadCSV(name: string, rows: Record<string, string>[], cols: string[]) {
