@@ -1,0 +1,39 @@
+# Ternary Cargo prototype: screenshots (flow order)
+
+- **01-login.png**: Login. Workspace sign-in with SSO options; entry point for every tenant user.
+- **02-tenant-select.png**: Tenant / org selection. One user can belong to several organisations; this is the multi-tenant SaaS core.
+- **03-dashboard.png**: Dashboard. KPIs, weekly volume by mode and an exceptions list, so managers see what needs action.
+- **04-master-customers.png**: Master data: customers. Shippers/consignees with a duplicate-TIN warning (clean master data, iForce-inspired).
+- **05-master-carriers.png**: Master data: carriers. Shipping lines, airlines and road hauliers with codes and contracts.
+- **06-master-ports.png**: Master data: ports & airports. UN/LOCODEs incl. LKCMB, CMB airport, Jebel Ali, Singapore.
+- **07-master-warehouses.png**: Master data: warehouses. CFS, air shed and bonded warehouses where unloading happens.
+- **08-master-hs.png**: Master data: commodities & HS codes. HS codes with hazmat and temperature flags drive customs and handling.
+- **09-master-containers.png**: Master data: container & ULD types. ISO container and air ULD types with payload and volume for consolidation.
+- **10-master-charges.png**: Master data: charges. Charge codes and default rates in USD/LKR feed quotes and invoices.
+- **11-quotation.png**: Quotation & booking. Priced LCL quote, accepted, one click to convert into a booking.
+- **12-shipments-list.png**: Shipments list. All modes (Sea FCL/LCL, Air, Road, Courier) with BL/AWB numbers and status.
+- **13-wizard-1-mode.png**: Create shipment wizard 1: mode & parties. Choose the mode and the parties; same flow for every mode.
+- **14-wizard-2-routing-sea.png**: Wizard 2: routing (sea). Ports, line, vessel/voyage, ETD/ETA and the delivery warehouse.
+- **15-wizard-2-routing-air.png**: Wizard 2: routing (air). The same step switches to airports, airline and flight for air.
+- **16-wizard-3-cargo.png**: Wizard 3: cargo lines. Packages, HS codes, weight and CBM, with auto totals.
+- **17-wizard-4-review.png**: Wizard 4: documents & review. Review, then choose HBL/MBL, ASYHUB manifest line and the confirmation.
+- **18-shipment-created.png**: Shipment created. Confirmation with HBL/MBL numbers and next actions.
+- **19-consolidation-sea.png**: Consolidation: container stuffing. House BLs stuffed into a 40' HC with fill %, weight and seal.
+- **20-consolidation-air-uld.png**: Consolidation: air ULD build-up. HAWBs built onto an AKE ULD under a MAWB.
+- **21-doc-hbl.png**: Documents: House BL preview. BL generated from shipment data, ready to download or send.
+- **22-doc-awb.png**: Documents: air waybill preview. HAWB preview for the air flow.
+- **23-doc-invoice.png**: Documents: commercial invoice. Commercial invoice with values per line.
+- **24-doc-packing.png**: Documents: packing list. Packing list used later at the tally.
+- **25-customs.png**: Customs declaration status. CUSDEC status per entry and ASYHUB manifest due (72 h sea rule).
+- **26-tracking.png**: Tracking timeline. Milestones from booking to delivery, plus route and container.
+- **27-arrival-notice.png**: Arrival notice. Notice to the consignee with free time and charges due.
+- **28-unloading-in-progress.png**: Unloading / devanning tally (in progress). Per-package tally with seal, actual weight and condition; 7 of 12 done.
+- **29-unloading-complete.png**: Unloading complete. All 12 tallied; one package flagged as damaged.
+- **30-verification-discrepancy.png**: Verification: discrepancy found. Piece, weight, seal and marks checks; damage report with photos for PKG-007.
+- **31-verification-verified.png**: Verification: signed off. Two-person sign-off, damage report sent, cargo released for DO.
+- **32-delivery-order.png**: Delivery order / release. DO with haulier and driver, gated on customs, verification and payment.
+- **33-billing.png**: Billing & invoice. Invoice built from shipment charges, with VAT and USD→LKR conversion.
+- **34-reports.png**: Reports. Volume, dwell, clearance time, discrepancy rate, profitability, carriers.
+- **35-settings-users.png**: Settings: users. Tenant users by role and branch.
+- **36-settings-roles.png**: Settings: roles & permissions. Role matrix, including who may sign off verification.
+- **37-settings-plan.png**: Settings: subscription plan. SaaS plans and seat usage (placeholder prices).
