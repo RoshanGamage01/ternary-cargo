@@ -1,4 +1,4 @@
-import Screens from "@/components/screens";
+import Router from "@/components/router";
 export default function Page({ params, searchParams }: { params: { slug?: string[] }; searchParams: Record<string, string> }) {
-  return <Screens route={params.slug?.join("/") ?? "login"} q={searchParams} />;
+  return <Router key={(params.slug ?? []).join("/")} r={params.slug?.join("/") ?? "login"} q={searchParams} />;
 }

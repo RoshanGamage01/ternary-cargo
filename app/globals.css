@@ -1,4 +1,78 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-body{background:#f6f7f9;color:#0f172a;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+
+@layer base {
+  :root {
+    --background: 220 20% 98%;        /* #F8F9FB */
+    --foreground: 226 55% 12%;        /* navy #0E1630 */
+    --card: 0 0% 100%;
+    --card-foreground: 226 55% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 226 55% 12%;
+    --primary: 179 78% 27%;           /* teal #0F7C7A */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 229 30% 95%;
+    --secondary-foreground: 229 50% 24%; /* indigo #1F2A5C */
+    --muted: 220 16% 95%;
+    --muted-foreground: 222 14% 40%;  /* ≥4.5:1 on card + background */
+    --accent: 179 40% 94%;
+    --accent-foreground: 179 78% 20%;
+    --highlight: 36 77% 53%;          /* saffron #E39B2D */
+    --highlight-foreground: 226 55% 12%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 14% 89%;
+    --input: 220 14% 84%;
+    --ring: 179 78% 32%;
+    --radius: 0.5rem;
+    /* sidebar / rail */
+    --sidebar: 229 50% 24%;           /* indigo */
+    --sidebar-foreground: 225 30% 86%;
+    --sidebar-active: 179 78% 27%;
+    /* semantic */
+    --success: 152 62% 32%;  --success-foreground: 0 0% 100%;
+    --warning: 36 85% 42%;   --warning-foreground: 0 0% 100%;   /* darker saffron for text contrast */
+    --info: 211 70% 42%;     --info-foreground: 0 0% 100%;
+    --danger: 0 72% 45%;     --danger-foreground: 0 0% 100%;
+    --neutral: 220 10% 46%;
+    /* modes */
+    --mode-sea: 229 50% 36%; --mode-air: 179 78% 32%; --mode-road: 36 77% 48%; --mode-courier: 266 40% 50%;
+    /* charts */
+    --chart-1: 229 50% 36%; --chart-2: 179 78% 32%; --chart-3: 36 77% 53%; --chart-4: 174 42% 51%; --chart-5: 222 14% 60%;
+  }
+  .dark {
+    --background: 226 55% 8%;         /* deeper than navy */
+    --foreground: 220 25% 92%;
+    --card: 226 50% 11%;              /* ≈ navy #0E1630 */
+    --card-foreground: 220 25% 92%;
+    --popover: 226 48% 13%;
+    --popover-foreground: 220 25% 92%;
+    --primary: 174 42% 51%;           /* light teal #4DB6AC */
+    --primary-foreground: 226 55% 10%;
+    --secondary: 228 35% 18%;
+    --secondary-foreground: 220 25% 90%;
+    --muted: 228 32% 16%;
+    --muted-foreground: 222 16% 66%;
+    --accent: 179 40% 16%;
+    --accent-foreground: 174 50% 75%;
+    --highlight: 36 80% 60%;
+    --highlight-foreground: 226 55% 10%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 226 55% 10%;
+    --border: 228 30% 20%;
+    --input: 228 30% 24%;
+    --ring: 174 42% 55%;
+    --sidebar: 226 55% 7%;
+    --sidebar-foreground: 222 16% 72%;
+    --sidebar-active: 174 42% 51%;
+    --success: 152 50% 52%;  --warning: 38 85% 60%;  --info: 211 80% 66%;  --danger: 0 75% 66%;  --neutral: 222 12% 62%;
+    --mode-sea: 229 60% 70%; --mode-air: 174 42% 55%; --mode-road: 36 80% 60%; --mode-courier: 266 50% 72%;
+  }
+  body { @apply bg-background text-foreground antialiased; font-feature-settings: "cv11", "ss01"; }
+}
+
+@layer base { * { @apply border-border; } }
+/* documents stay on white paper in dark mode */
+.doc-paper { --card: 0 0% 100%; --card-foreground: 226 55% 12%; --foreground: 226 55% 12%; --muted: 220 16% 95%; --muted-foreground: 222 14% 40%; --border: 220 14% 80%; background: hsl(var(--card)); color: hsl(var(--foreground)); }
+@media print { aside, header, .no-print { display:none !important } main{padding:0!important} .print-ml0{margin-left:0!important} }

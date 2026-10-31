@@ -1,0 +1,64 @@
+# Ternary Cargo v2: screenshots (flow order, 1440×900 unless noted)
+
+- **01-login.png**: Sign in. Branded login with the Pulli Grid mark and the factory-to-consignee promise. *Why it matters:* First impression; one platform for exporters and forwarders.
+- **02-tenant-select.png**: Choose workspace. Forwarder, manufacturer and NVOCC tenants for one user. *Why it matters:* Multi-tenant SaaS core.
+- **03-onboarding-1.png**: Tenant onboarding wizard, step 1. Self-serve workspace set-up with validation. *Why it matters:* Lets new customers start a trial without us.
+- **04-onboarding-2-type.png**: Onboarding, business type. Manufacturer, forwarder or CFS operator. *Why it matters:* Tailors modules to the persona.
+- **05-dashboard-forwarder.png**: Dashboard: forwarder ops. KPIs, ETA watch with carrier vs P50/P90, needs-attention list, quick actions. *Why it matters:* Ops staff run the day from exceptions and at-risk ETAs.
+- **06-dashboard-exporter.png**: Dashboard: exporter persona. Orders, SGTIN cartons, pallets and loading KPIs. *Why it matters:* Role-based home for the manufacturer.
+- **07-command-palette.png**: Command palette (Ctrl-K). Global search across shipments, orders, SSCCs, customers and actions. *Why it matters:* Keyboard-first speed.
+- **08-notifications.png**: Notifications panel. Unread alerts linked to records. *Why it matters:* Nothing gets missed.
+- **09-assistant.png**: AI assistant (mock). Where-is-my-shipment answers and invoice field extraction, labelled MOCK. *Why it matters:* Concept for reducing calls and retyping.
+- **10-exceptions.png**: Exceptions centre. Customs, ETA, D&D, finance and discrepancy exceptions with Open / Assign / Resolve. *Why it matters:* Lead with exceptions, not lists.
+- **11-master-customers.png**: Master data: customers. Searchable, sortable, paginated table with CSV/PDF export, inline status and edit/delete. *Why it matters:* Clean shared reference data.
+- **12-master-new-validation.png**: New customer form with validation. Drawer form; required and format errors shown inline. *Why it matters:* Every 'New' form opens, validates and saves.
+- **13-master-products.png**: Master data: products / SKUs. GTIN, carton dims, weight, stackable and hazmat flags feed serialisation and 3D. *Why it matters:* Type once, reuse everywhere.
+- **14-mfg-sales-orders.png**: Manufacturing: sales orders. Export orders of finished goods linked to shipments. *Why it matters:* The manufacturer's starting point.
+- **15-mfg-serialisation.png**: Serialisation: SGTIN per carton + scan. 240 GS1 SGTINs generated, carton label preview, scan verification. *Why it matters:* Traceability from the factory floor.
+- **16-mfg-palletising.png**: Palletising with SSCC labels. Pallets auto-built to 120×100 / 150 cm / 1,000 kg, each with an SSCC pallet label. *Why it matters:* Handling units identified per GS1.
+- **17-mfg-packing-list.png**: Packing list / ASN from pallets. Generated from pallet SSCCs, issued into documents. *Why it matters:* The ASN drives receiving at destination.
+- **18-load3d-40hc.png**: 3D load plan: 40' HC by order. Three orders' pallets placed in 3D; volume and payload %, CoG marker, door label, advisory checks incl. hazmat. *Why it matters:* Shows utilisation before the truck arrives.
+- **19-load3d-40hc-sku.png**: 3D load plan coloured by SKU. Same plan, colour by SKU; non-stackable battery cartons show a saffron top. *Why it matters:* Lets the crew see what goes where.
+- **20-load3d-20gp.png**: 3D load plan: 20' GP. One order in a 20' GP with payload and CoG checks. *Why it matters:* Compare container sizes.
+- **21-load3d-40gp-cartons.png**: 3D load plan: 40' GP loose cartons. Loose cartons floor-loaded. *Why it matters:* Cartons vs pallets trade-off.
+- **22-load3d-uld.png**: 3D load plan: air ULD (AKE). Apparel cartons in an LD3 ULD with the 1,588 kg limit; unplaced units flagged. *Why it matters:* Same tool for air.
+- **23-mfg-loading-progress.png**: Loading confirmation in progress. Pallets scanned into the container; container and seal required. *Why it matters:* Proof of what was loaded.
+- **24-mfg-loading-confirmed.png**: Loading confirmed. All pallets loaded, container sealed, order set to Loaded. *Why it matters:* Hand-over evidence.
+- **25-mfg-unloading-confirmation.png**: Unloading confirmation at destination. SSCC scans matched against the ASN; outstanding count. *Why it matters:* Closes the factory-to-consignee loop.
+- **26-mfg-order-detail.png**: Sales order detail. Pipeline from production to shipped with counts and next steps. *Why it matters:* One record across the whole flow.
+- **27-quotations.png**: Quotations, rate comparison & landed cost. Three carrier options, landed-cost calculator, quote list with Book action. *Why it matters:* Quote with confidence.
+- **28-bookings.png**: Bookings. Carrier bookings with Create shipment action. *Why it matters:* Quote → booking → shipment without retyping.
+- **29-shipments-list.png**: Shipments list with ETA. All modes, mode filter, carrier ETA vs P50/P90 and delay risk. *Why it matters:* ETA prediction on the list.
+- **30-wizard-1.png**: New shipment wizard 1: mode & parties. Mode tiles, parties, Incoterm, link to sales order. *Why it matters:* Same wizard for sea, air, road and courier.
+- **31-wizard-2-routing.png**: Wizard 2: routing with live ETA estimate. Ports, carrier, dates, transhipment and customs risk; predicted ETA updates. *Why it matters:* Estimate before booking.
+- **32-wizard-3-validation.png**: Wizard 3: cargo with validation. Zero packages is blocked with an inline error; W/M computed. *Why it matters:* Forms validate, not just look.
+- **33-wizard-4-review.png**: Wizard 4: review. Summary before creation. *Why it matters:* Check once, then create.
+- **34-shipment-created-detail.png**: Shipment created → detail page. New shipment with HBL/MBL, equipment and the predicted ETA panel. *Why it matters:* Created records appear everywhere.
+- **35-shipment-eta.png**: Shipment tracking & ETA (P50/P90). Carrier ETA vs P50/P90, confidence and delay-risk factors (Colombo congestion, customs, carrier). *Why it matters:* Explains why an ETA moves.
+- **36-shipment-doc-checklist.png**: Shipment documents checklist. Required documents per mode with Generate for missing ones. *Why it matters:* Missing-document alerts before customs.
+- **37-shipment-dd.png**: Demurrage & detention countdown. Free time left, mock daily rate, reminder. *Why it matters:* Saves money that leaks quietly.
+- **38-shipment-co2.png**: CO2e estimate. GLEC/ISO 14083-style t × km × intensity with placeholder factors. *Why it matters:* EU buyers ask for it.
+- **39-shipment-event-log.png**: Event log. Append-only events with source (carrier, ASYHUB, user) and actor. *Why it matters:* Audit trail and evidence.
+- **40-consolidation-sea.png**: Consolidation: container stuffing. Pick house shipments; fill % and capacity checks. *Why it matters:* LCL consolidation.
+- **41-consolidation-uld.png**: Consolidation: air ULD. HAWBs onto a ULD. *Why it matters:* Air consolidation.
+- **42-document-preview.png**: Document preview. BL preview on white paper with print and send. *Why it matters:* Documents generated from data.
+- **43-customs.png**: Customs. CUSDEC and ASYHUB manifest statuses with counts. *Why it matters:* Local compliance clock.
+- **44-tracking.png**: Tracking & ETA. Lat/long-correct schematic route (Chennai → Colombo) with P50/P90 panel. *Why it matters:* Where it is and when it arrives.
+- **45-arrival-notices.png**: Arrival notices. Notices with Email action. *Why it matters:* Tell the consignee early.
+- **46-unloading-in-progress.png**: Unloading & tally in progress. Per-package variance vs ±2% tolerance; PKG-007 flagged; weighed vs expected for tallied. *Why it matters:* The clerk sees problems as they happen.
+- **47-unloading-complete.png**: Unloading complete. 12/12 tallied; exception count matches flags. *Why it matters:* Consistent counts.
+- **48-mobile-scan-offline.png**: Mobile scan, offline queue. Handheld view; scans queue offline and sync later. *Why it matters:* Works with weak signal on the floor.
+- **49-verification-discrepancy.png**: Verification: discrepancies open. Package condition and weight discrepancies; damage report with photos; sign-off as exception only. *Why it matters:* No silent sign-off.
+- **50-verification-exception-dialog.png**: Sign off with exception: reason + second approver. Two-person control with a documented reason. *Why it matters:* Separation of duties.
+- **51-verification-verified.png**: Verified with exception. Signed by supervisor and second approver; DO can be issued. *Why it matters:* Evidence for claims.
+- **52-delivery-order-gate.png**: Delivery order release gate. Customs, verification and payment checks before release. *Why it matters:* Release only what is cleared and paid.
+- **53-billing.png**: Billing. Invoices with Send / Mark paid, totals. *Why it matters:* Every job is invoiced.
+- **54-reports.png**: Reports. Live reports with CSV export: modes, predicted delay, CO2e, invoices, orders, customs. *Why it matters:* Managers buy on reports.
+- **55-settings-users.png**: Settings: users. Users table with invite/edit. *Why it matters:* Tenant admin.
+- **56-settings-roles.png**: Settings: roles & permissions. Editable permission matrix incl. verification sign-off. *Why it matters:* Control who releases cargo.
+- **57-settings-subscription.png**: Settings: subscription (indicative). Starter / Business / Enterprise in LKR with USD reference, usage and add-ons, labelled indicative. *Why it matters:* SaaS model from commercial plan.
+- **58-settings-reset.png**: Settings: reset demo data. Reset localStorage demo data with confirmation. *Why it matters:* Safe demos.
+- **59-customer-portal.png**: Customer portal (shared link). Read-only consignee view: milestones, ETA, documents. *Why it matters:* Fewer 'where is my cargo' calls.
+- **60-dark-mode-dashboard.png**: Dark mode. Token-based dark theme. *Why it matters:* Comfort in control rooms.
+- **61-dark-mode-load3d.png**: Dark mode: 3D load plan. 3D planner in dark theme. *Why it matters:* Consistent theming.
+- **62-responsive-mobile.png**: Responsive layout (390 px). Collapsed sidebar with menu button. *Why it matters:* Usable on phones.

@@ -1,36 +1,15 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ternary Cargo: interactive UI prototype (v2)
 
-## Getting Started
-
-First, run the development server:
+One SaaS platform for exporters, manufacturers and forwarders, from the factory floor to the consignee. **UI only:** mock data, state kept in localStorage, no backend. ETA predictions, CO2e figures, prices and load plans are illustrative.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev            # http://localhost:3000
+npm run build && npx next start -p 3100
+node tests/dead-buttons.mjs     # Playwright dead-button check (server on :3100)
+node tests/shots-v2.mjs         # screenshots -> ../screens-v2
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Modules: Manufacturing (sales orders → SGTIN serialisation → SSCC palletising → packing list/ASN → 3D load plan → loading → unloading confirmation), freight ops (quotes, bookings, shipments with P50/P90 ETA, consolidation, documents, customs, tracking, arrival), warehouse (tally, verification with two-person exception sign-off, offline mobile scan, DO release), finance and admin, and the customer portal.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Docs: `docs/research.md`, `docs/product-vision.md`, `docs/team/`, and screenshots in `docs/screens-v2/index.md` (v1 in `docs/screens/`).

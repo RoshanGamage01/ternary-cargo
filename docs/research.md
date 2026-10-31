@@ -28,3 +28,23 @@ Standard module set shared by them: master data, quotation/rates, booking, shipm
 - Name: "Ternary Cargo" (working name; nothing in the research suggested a better one).
 - Differentiators for the local market: an ASYHUB manifest-ready export (sea), CHA (Customs House Agent) workflow for the declaration, and a mobile tally/verification screen.
 - Not verified / open: SLPA terminal (JCT/SAGT/CICT/ECT) integrations, AASL/SriLankan cargo terminal APIs, and pricing benchmarks.
+
+---
+# Round 2 research (31 Oct 2026)
+
+## 5. Manufacturer export flow and GS1 SSCC serialisation
+- An SSCC is an 18-digit GS1 key for a logistic unit (case, pallet, air cargo container), encoded in GS1-128 with Application Identifier (00). It is made of an extension digit, the GS1 Company Prefix, a serial reference and a check digit. Extension + prefix + serial always total 17 digits. https://www.gs1us.org/upcs-barcodes-prefixes/serialized-shipping-container-codes , https://www.gs1us.org/content/dam/gs1us/documents/tools-resources/resources/data-hub-help-center/Removal/intro-to-sscc-pdf.pdf
+- The SSCC is the only mandatory element of a GS1 Logistic Label. It should be assigned by whoever builds the unit, using their own company prefix. Serial references can be sequential. The check digit uses the GS1 algorithm. https://ref.gs1.org/guidelines/logistic-label/1.2.0/ , https://www.gs1.org/standards/gs1-logistic-label-guideline/current-standard
+- One SSCC scan at the receiving bay can be matched with a pre-sent Advance Ship Notice (ASN) to speed up receiving and reconciliation. A unit that is broken down and repacked gets a new SSCC. https://www.gs1us.org/content/dam/gs1us/documents/tools-resources/resources/data-hub-help-center/Removal/intro-to-sscc-pdf.pdf
+- Pallet labels: use two identical labels, one on a short side and one on a long side, placed 400–800 mm above the base and at least 50 mm from vertical edges. If there are several barcodes, the SSCC goes at the bottom. https://www.gs1uk.org/knowledge-hub/barcodes/where-should-pallet-labels-be-placed
+- Implication for the prototype: sales order → serialise cartons → build pallets (each pallet gets an SSCC) → packing list from pallets (an ASN) → load plan → loading confirmation by scan → unloading confirmation by SSCC scan against the ASN at destination. This flow is our design, derived from the GS1 guidance above.
+
+## 6. Load planning tools
+- EasyCargo: web-based 3D load planner for containers, trucks and pallets. Interactive rotate/zoom 3D view, real-time payload and volume usage, constraints (non-stackable, no-tilt), priority groups by destination, step-by-step loading reports, Excel/API/SAP integration. https://www.easycargo3d.com/en/ , https://www.easycargo3d.com/en/3d-container-load-calculator/
+- Cargo-Planner: chooses the cheapest container mix, keeps centre of gravity within 10% of the container centre, handles pallets, flat racks, open tops and ULDs, and shares step-by-step 3D plans by link. https://cargo-planner.com/sea-container-loading-software/
+- Prototype: uses a simple greedy layer/shelf heuristic, not an optimiser. Container internal dimensions and payloads are typical published values and must be verified per carrier before production.
+
+## 7. ETA prediction
+- Portcast: ML predicted ETA built from 70+ data sources (AIS vessel position, carrier schedule changes, port congestion, dwell, historical lane performance, weather, disruptions). It predicts at milestone level (berthing, discharge, customs, gate-out), shows delay as the gap between carrier ETA and predicted ETA, and explains the cause. https://www.portcast.io/predictive-visibility , https://www.portcast.io/real-time-container-tracking , https://kb.portcast.io/Understanding-Delay-and-Incident-Reporting-in-Ocean-Visibility-18106ae01ad1805e9a12d605c5784895
+- project44: ocean ETAs combine sailing schedules, carrier ETAs, rotation and lane performance, port congestion, and vessel and container attributes. Geofenced milestones are detected about 4x faster than carrier-reported events. https://www.project44.com/blog/5-ways-machine-learning-makes-visibility-more-valuable/ , https://www.project44.com/blog/achieving-high-velocity-with-ai-powered-predictive-etas/
+- Prototype: a transparent heuristic (carrier ETA + weighted delay factors for congestion, transhipment, weather, customs, carrier reliability), labelled "Prototype estimate", with a ±band. It is not ML and has no live data.
