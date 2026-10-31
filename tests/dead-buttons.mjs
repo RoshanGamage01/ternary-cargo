@@ -13,7 +13,7 @@ async function prep(r) {
   // pre-seed manufacturing state so downstream screens have pallets
 }
 // seed manufacturing data by real clicks
-await prep("manufacturing/serialisation"); await p.click("text=Generate labels"); await p.click("text=Batch-verify all");
+await prep("manufacturing/serialisation"); await p.getByRole("button",{name:"Generate labels"}).first().click(); await p.waitForTimeout(300); await p.click("text=Batch-verify all");
 await prep("manufacturing/palletising"); await p.click("text=Auto-build all"); await p.waitForTimeout(300);
 for (const r of routesRun) {
   await prep(r);
@@ -23,6 +23,7 @@ for (const r of routesRun) {
     const btn = p.locator("button:visible").nth(i);
     if (!(await btn.count())) continue;
     if (await btn.isDisabled()) continue;
+    if ((await btn.getAttribute("aria-pressed")) === "true") continue; // already-selected toggle: a no-op by design
     const label = ((await btn.innerText().catch(() => "")) || (await btn.getAttribute("aria-label")) || "").trim().slice(0, 40);
     const before = { url: p.url(), html: await p.evaluate(() => document.body.innerHTML), pr: await p.evaluate(() => window.__printed || 0) };
     let dl = false; const h = () => { dl = true; }; p.on("download", h);

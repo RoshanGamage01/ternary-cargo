@@ -1,6 +1,12 @@
 "use client";
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { seed, DB, Row } from "./seed";
+import { toast as sonner } from "sonner";
+import { useTheme } from "next-themes";
+export type Extra = { notes: { id: number; text: string; at: string; by: string }[]; files: { id: number; name: string; size: string; at: string }[]; overrides: Record<string, { from: string; to: string; reason: string; by: string; at: string }>; tags: string[] };
+export type CustomField = { k: string; label: string; type: "text" | "number" | "date" | "select" | "yes/no"; options?: string };
+export type SavedView = { id: string; name: string; q: string; status: string; sort?: { k: string; dir: 1 | -1 } | null; hidden: string[]; layout: "table" | "cards" };
+const emptyExtra = (): Extra => ({ notes: [], files: [], overrides: {}, tags: [] });
 type Toast = { id: number; msg: string; tone: "ok" | "err" | "info" };
 export type Ev = { id: number; ref: string; text: string; at: string; actor: string; source: string };
 type Notif = { id: number; text: string; at: string; read: boolean; href?: string };
@@ -11,10 +17,16 @@ type Ctx = {
   reset: () => void; toast: (msg: string, tone?: Toast["tone"]) => void; toasts: Toast[];
   notifs: Notif[]; notify: (text: string, href?: string) => void; markRead: () => void;
   events: Ev[]; log: (ref: string, text: string, source?: string) => void;
+  extra: Record<string, Extra>; patchExtra: (key: string, f: (e: Extra) => Extra) => void; getExtra: (key: string) => Extra;
+  customFields: Record<string, CustomField[]>; setCustomFields: (k: string, f: CustomField[]) => void;
+  views: Record<string, SavedView[]>; setViews: (k: string, v: SavedView[]) => void;
+  expert: boolean; setExpert: (b: boolean) => void; dismissed: string[]; dismiss: (k: string) => void; undismiss: () => void;
   dark: boolean; setDark: (d: boolean) => void; palette: boolean; setPalette: (b: boolean) => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);
-const KEY = "ternary-cargo-v2";
+const KEY = "ternary-cargo-v3";
+const seedCustom = (): Record<string, CustomField[]> => ({ shipments: [{ k: "cf_buyerPo", label: "Buyer PO number", type: "text" }, { k: "cf_insured", label: "Cargo insured", type: "yes/no" }], salesOrders: [{ k: "cf_lc", label: "Letter of credit no.", type: "text" }] });
+const seedViews = (): Record<string, SavedView[]> => ({ shipments: [{ id: "v-hold", name: "Needs action", q: "", status: "Customs hold", hidden: [], layout: "cards" }, { id: "v-sea", name: "Sea only", q: "Sea", status: "All", hidden: [], layout: "table" }], invoices: [{ id: "v-od", name: "Overdue", q: "", status: "Overdue", hidden: [], layout: "table" }] });
 const seedNotifs = (): Notif[] => [
   { id: 1, text: "TC-AIR-08812 on customs hold: HS 3004.90 permit query", at: "13:42", read: false, href: "/shipments/TC-AIR-08812" },
   { id: 2, text: "ASYHUB manifest for TC-SEA-24118 due in 18 h", at: "12:10", read: false, href: "/customs" },
@@ -27,26 +39,33 @@ const seedEvents = (): Ev[] => [
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [db, setDb] = useState<DB>(seed);
   const [ready, setReady] = useState(false);
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toasts] = useState<Toast[]>([]);
+  const [extra, setExtra] = useState<Record<string, Extra>>({});
+  const [customFields, setCF] = useState<Record<string, CustomField[]>>(seedCustom);
+  const [views, setV] = useState<Record<string, SavedView[]>>(seedViews);
+  const [expert, setExpert] = useState(false);
+  const [dismissed, setDismissed] = useState<string[]>([]);
+  const { resolvedTheme, setTheme } = useTheme();
   const [notifs, setNotifs] = useState<Notif[]>(seedNotifs);
-  const [dark, setDarkS] = useState(false);
   const [events, setEvents] = useState<Ev[]>(seedEvents);
   const [palette, setPalette] = useState(false);
   useEffect(() => {
-    try { const s = localStorage.getItem(KEY); if (s) { const p = JSON.parse(s); setDb({ ...seed(), ...p.db }); if (p.notifs) setNotifs(p.notifs); if (p.events) setEvents(p.events); setDarkS(!!p.dark); } } catch {}
+    try { const s = localStorage.getItem(KEY); if (s) { const p = JSON.parse(s); setDb({ ...seed(), ...p.db }); if (p.notifs) setNotifs(p.notifs); if (p.events) setEvents(p.events); if (p.extra) setExtra(p.extra); if (p.customFields) setCF(p.customFields); if (p.views) setV(p.views); setExpert(!!p.expert); if (p.dismissed) setDismissed(p.dismissed); } } catch {}
     setReady(true);
   }, []);
-  useEffect(() => { if (ready) localStorage.setItem(KEY, JSON.stringify({ db, notifs, dark, events })); }, [db, notifs, dark, events, ready]);
-  useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
-  const toast = useCallback((msg: string, tone: Toast["tone"] = "ok") => { const id = Date.now() + Math.random(); setToasts(t => [...t, { id, msg, tone }]); setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3200); }, []);
+  useEffect(() => { if (ready) localStorage.setItem(KEY, JSON.stringify({ db, notifs, events, extra, customFields, views, expert, dismissed })); }, [db, notifs, events, extra, customFields, views, expert, dismissed, ready]);
+  const dark = resolvedTheme === "dark"; const setDarkS = (d: boolean) => setTheme(d ? "dark" : "light");
+  const toast = useCallback((msg: string, tone: Toast["tone"] = "ok") => { if (tone === "err") sonner.error(msg); else if (tone === "info") sonner.info(msg); else sonner.success(msg); }, []);
   const notify = useCallback((text: string, href?: string) => setNotifs(n => [{ id: Date.now(), text, at: new Date().toTimeString().slice(0, 5), read: false, href }, ...n]), []);
   const log = useCallback((ref: string, text: string, source = "user") => setEvents(e => [{ id: Date.now() + Math.random(), ref, text, at: new Date().toISOString(), actor: "Nimal Perera", source }, ...e].slice(0, 500)), []);
   const add = (k: keyof DB, row: Omit<Row, "id">) => { const nr = { ...row, id: `${Date.now()}${Math.floor(Math.random() * 1000)}` } as Row; setDb(d => ({ ...d, [k]: [nr, ...d[k]] })); log(String(row.ref ?? row.code ?? row.shipment ?? row.name ?? k), `Created ${String(k)} ${String(row.ref ?? row.code ?? row.name ?? "")}`); return nr; };
   const update = (k: keyof DB, id: string, patch: Partial<Row>) => { const r = (db[k] as Row[]).find(x => x.id === id); if (r) log(r.ref ?? r.code ?? r.name ?? String(k), `${String(k)} ${r.ref ?? r.code ?? r.name ?? ""} updated: ${Object.entries(patch).map(([a, b]) => `${a}=${b}`).join(", ")}`); setDb(d => ({ ...d, [k]: d[k].map(r => r.id === id ? { ...r, ...patch } as Row : r) })); };
   const remove = (k: keyof DB, id: string) => setDb(d => ({ ...d, [k]: d[k].filter(r => r.id !== id) }));
   const setMany = (k: keyof DB, rows: Row[]) => setDb(d => ({ ...d, [k]: rows }));
-  const reset = () => { localStorage.removeItem(KEY); setDb(seed()); setNotifs(seedNotifs()); setEvents(seedEvents()); toast("Demo data reset"); };
-  return <C.Provider value={{ db, ready, add, update, remove, setMany, reset, toast, toasts, notifs, notify, events, log, markRead: () => setNotifs(n => n.map(x => ({ ...x, read: true }))), dark, setDark: setDarkS, palette, setPalette }}>{children}<div className="fixed bottom-4 right-4 z-[60] space-y-2" aria-live="polite">{toasts.map(t => <div key={t.id} role="status" className={t.tone === "err" ? "rounded-lg bg-danger px-4 py-2.5 text-sm text-white shadow-lg" : t.tone === "info" ? "rounded-lg bg-foreground px-4 py-2.5 text-sm text-background shadow-lg" : "rounded-lg bg-success px-4 py-2.5 text-sm text-white shadow-lg"}>{t.msg}</div>)}</div></C.Provider>;
+  const patchExtra = useCallback((key: string, f: (e: Extra) => Extra) => setExtra(x => ({ ...x, [key]: f(x[key] ?? emptyExtra()) })), []);
+  const getExtra = (key: string) => extra[key] ?? emptyExtra();
+  const reset = () => { localStorage.removeItem(KEY); setDb(seed()); setNotifs(seedNotifs()); setEvents(seedEvents()); setExtra({}); setCF(seedCustom()); setV(seedViews()); setDismissed([]); toast("Demo data reset"); };
+  return <C.Provider value={{ db, ready, add, update, remove, setMany, reset, toast, toasts, notifs, notify, events, log, markRead: () => setNotifs(n => n.map(x => ({ ...x, read: true }))), dark, setDark: setDarkS, palette, setPalette, extra, patchExtra, getExtra, customFields, setCustomFields: (k, f) => setCF(c => ({ ...c, [k]: f })), views, setViews: (k, v) => setV(c => ({ ...c, [k]: v })), expert, setExpert, dismissed, dismiss: k => setDismissed(d => [...d, k]), undismiss: () => setDismissed([]) }}>{children}</C.Provider>;
 }
 export const useStore = () => useContext(C);
 export function downloadCSV(name: string, rows: Record<string, string>[], cols: string[]) {

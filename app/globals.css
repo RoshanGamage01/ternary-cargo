@@ -4,37 +4,38 @@
 
 @layer base {
   :root {
-    --background: 220 20% 98%;        /* #F8F9FB */
+    --background: 216 33% 98.4%;        /* #F8F9FB */
     --foreground: 226 55% 12%;        /* navy #0E1630 */
     --card: 0 0% 100%;
     --card-foreground: 226 55% 12%;
     --popover: 0 0% 100%;
     --popover-foreground: 226 55% 12%;
-    --primary: 179 78% 27%;           /* teal #0F7C7A */
+    --primary: 179 78% 24%;           /* teal #0F7C7A */
     --primary-foreground: 0 0% 100%;
     --secondary: 229 30% 95%;
     --secondary-foreground: 229 50% 24%; /* indigo #1F2A5C */
-    --muted: 220 16% 95%;
+    --muted: 216 25% 95.5%;
     --muted-foreground: 222 14% 40%;  /* ≥4.5:1 on card + background */
-    --accent: 179 40% 94%;
-    --accent-foreground: 179 78% 20%;
+    --accent: 176 38% 94%;
+    --accent-foreground: 179 78% 18%;
     --highlight: 36 77% 53%;          /* saffron #E39B2D */
     --highlight-foreground: 226 55% 12%;
     --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 14% 89%;
+    --border: 220 16% 91%;
     --input: 220 14% 84%;
     --ring: 179 78% 32%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
     /* sidebar / rail */
-    --sidebar: 229 50% 24%;           /* indigo */
-    --sidebar-foreground: 225 30% 86%;
+    --sidebar: 216 30% 96%;           /* v3: calm light rail */
+    --sidebar-foreground: 226 55% 12%;
     --sidebar-active: 179 78% 27%;
+    --ink: 229 50% 20%;
     /* semantic */
-    --success: 152 62% 32%;  --success-foreground: 0 0% 100%;
-    --warning: 36 85% 42%;   --warning-foreground: 0 0% 100%;   /* darker saffron for text contrast */
-    --info: 211 70% 42%;     --info-foreground: 0 0% 100%;
-    --danger: 0 72% 45%;     --danger-foreground: 0 0% 100%;
+    --success: 152 64% 25%;  --success-foreground: 0 0% 100%;
+    --warning: 30 90% 29%;   --warning-foreground: 0 0% 100%;   /* darker saffron for text contrast */
+    --info: 211 72% 36%;     --info-foreground: 0 0% 100%;
+    --danger: 0 72% 39%;     --danger-foreground: 0 0% 100%;
     --neutral: 220 10% 46%;
     /* modes */
     --mode-sea: 229 50% 36%; --mode-air: 179 78% 32%; --mode-road: 36 77% 48%; --mode-courier: 266 40% 50%;
@@ -63,9 +64,10 @@
     --border: 228 30% 20%;
     --input: 228 30% 24%;
     --ring: 174 42% 55%;
-    --sidebar: 226 55% 7%;
-    --sidebar-foreground: 222 16% 72%;
+    --sidebar: 226 52% 9%;
+    --sidebar-foreground: 220 25% 90%;
     --sidebar-active: 174 42% 51%;
+    --ink: 226 55% 7%;
     --success: 152 50% 52%;  --warning: 38 85% 60%;  --info: 211 80% 66%;  --danger: 0 75% 66%;  --neutral: 222 12% 62%;
     --mode-sea: 229 60% 70%; --mode-air: 174 42% 55%; --mode-road: 36 80% 60%; --mode-courier: 266 50% 72%;
   }
@@ -74,5 +76,14 @@
 
 @layer base { * { @apply border-border; } }
 /* documents stay on white paper in dark mode */
-.doc-paper { --card: 0 0% 100%; --card-foreground: 226 55% 12%; --foreground: 226 55% 12%; --muted: 220 16% 95%; --muted-foreground: 222 14% 40%; --border: 220 14% 80%; background: hsl(var(--card)); color: hsl(var(--foreground)); }
+.doc-paper { --card: 0 0% 100%; --card-foreground: 226 55% 12%; --foreground: 226 55% 12%; --muted: 216 25% 95.5%; --muted-foreground: 222 14% 40%; --border: 220 14% 80%; background: hsl(var(--card)); color: hsl(var(--foreground)); }
 @media print { aside, header, .no-print { display:none !important } main{padding:0!important} .print-ml0{margin-left:0!important} }
+
+/* v3: calmer surfaces */
+body { letter-spacing: -0.003em; }
+h1, h2, h3 { letter-spacing: -0.015em; }
+.grid > * { min-width: 0; }
+main p a:not([class*="rounded"]):not([class*="font-mono"]), main li > p a { text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 640px) { table { font-size: 13px; } }
+
+a.text-primary{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}

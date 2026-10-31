@@ -2,11 +2,12 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Edges, Html } from "@react-three/drei";
 import type { Placed } from "@/lib/pack";
-export default function Load3D({ space, placed, colorBy, palette, cog = { x: space.L / 2, y: space.W / 2 } }: { space: { L: number; W: number; H: number }; placed: Placed[]; colorBy: "group" | "sku"; palette: Record<string, string>; cog?: { x: number; y: number } }) {
+export default function Load3D({ space, placed, colorBy, palette, cog = { x: space.L / 2, y: space.W / 2 }, view = "iso" }: { view?: "iso" | "top" | "side" | "door"; space: { L: number; W: number; H: number }; placed: Placed[]; colorBy: "group" | "sku"; palette: Record<string, string>; cog?: { x: number; y: number } }) {
   const s = 0.01; // cm -> m
   const L = space.L * s, W = space.W * s, H = space.H * s;
   const dist = Math.max(L, 3) * 1.1;
-  return <Canvas gl={{ preserveDrawingBuffer: true }} camera={{ position: [dist * 0.8, dist * 0.55, dist * 0.8], fov: 35 }} dpr={[1, 2]} frameloop="demand" style={{ background: "hsl(var(--muted))" }}>
+  const cam: Record<string, [number, number, number]> = { iso: [dist * 0.8, dist * 0.55, dist * 0.8], top: [0, dist * 1.5, 0.001], side: [0, H * 0.5, dist * 1.35], door: [dist * 1.2, H * 0.55, 0] };
+  return <Canvas key={view} gl={{ preserveDrawingBuffer: true }} camera={{ position: cam[view], fov: 35 }} dpr={[1, 2]} frameloop="demand" style={{ background: "hsl(var(--muted))" }}>
     <ambientLight intensity={0.7} /><directionalLight position={[5, 10, 5]} intensity={1} />
     <group position={[-L / 2, 0, -W / 2]}>
       <mesh position={[L / 2, H / 2, W / 2]}><boxGeometry args={[L, H, W]} /><meshStandardMaterial color="#0F7C7A" transparent opacity={0.06} /><Edges color="#64748B" /></mesh>
