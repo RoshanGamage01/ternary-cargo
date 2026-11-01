@@ -1,8 +1,10 @@
 // Tiny client-side PDF writer (Helvetica, one page). Produces a real .pdf file for demo documents.
 export function makePdf(title: string, lines: string[]): Blob {
   const esc = (t: string) => t.replace(/[\\()]/g, m => "\\" + m).replace(/[^\x20-\x7E]/g, "-");
-  const body = [`BT /F1 18 Tf 50 790 Td (${esc(title)}) Tj ET`, ...lines.map((l, i) => `BT /F1 11 Tf 50 ${760 - i * 18} Td (${esc(l)}) Tj ET`)].join("\n");
-  const objs = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>", "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", `<< /Length ${body.length} >>\nstream\n${body}\nendstream`];
+  const per = 38; const pages: string[][] = []; for (let i = 0; i < Math.max(1, lines.length); i += per) pages.push(lines.slice(i, i + per));
+  const n = pages.length; const objs: string[] = ["<< /Type /Catalog /Pages 2 0 R >>", `<< /Type /Pages /Kids [${pages.map((_, i) => `${4 + i * 2} 0 R`).join(" ")}] /Count ${n} >>`, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"];
+  pages.forEach((pl, p) => { const body = [p === 0 ? `BT /F1 18 Tf 50 790 Td (${esc(title)}) Tj ET` : `BT /F1 9 Tf 50 810 Td (${esc(title)} - page ${p + 1} of ${n}) Tj ET`, ...pl.map((l, i) => `BT /F1 11 Tf 50 ${760 - i * 18} Td (${esc(l)}) Tj ET`)].join("\n");
+    objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents ${5 + p * 2} 0 R >>`, `<< /Length ${body.length} >>\nstream\n${body}\nendstream`); });
   let out = "%PDF-1.4\n"; const off: number[] = [];
   objs.forEach((o, i) => { off.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
   const x = out.length; out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n${off.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("")}trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${x}\n%%EOF`;

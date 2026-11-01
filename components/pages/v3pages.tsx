@@ -1,4 +1,5 @@
 "use client";
+import { useLang } from "@/lib/i18n";
 import Link from "next/link";
 import { useState } from "react";
 import { Calculator, Ship, Factory, Container, PackageOpen, Truck, Receipt, Search, ArrowRight, AlertTriangle, Plus, Trash2, Sparkles, ClipboardCheck, MapPin } from "lucide-react";
@@ -22,7 +23,7 @@ const TASKS = [
   { k: "bill", icon: Receipt, t: "Bill a customer", d: "Invoice the job and see who has paid", href: "/billing", who: "Finance", c: "from-rose-500/15" },
 ];
 export function Start() {
-  const { db, update, toast } = useStore(); const [q, setQ] = useState("");
+  const { db, update, toast } = useStore(); const [q, setQ] = useState(""); const { t, lang } = useLang();
   const moving = db.shipments.filter(s => s.status !== "Delivered").slice(0, 4);
   const orders = db.salesOrders.filter(o => !["Shipped", "Cancelled"].includes(o.status)).slice(0, 3);
   const today = [
@@ -35,8 +36,8 @@ export function Start() {
   return <Shell active="start" title="Start here">
     <section className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-accent via-card to-card p-8 lg:p-10">
       <p className="text-sm font-medium text-primary">Good afternoon, Nimal</p>
-      <h2 className="mt-1 font-display text-3xl font-semibold tracking-tight lg:text-4xl">What do you want to do?</h2>
-      <p className="mt-2 max-w-2xl text-muted-foreground">Pick a task. Each one walks you through the steps and tells you what comes next. Not sure? Type it in your own words.</p>
+      <h2 className="mt-1 font-display text-3xl font-semibold tracking-tight lg:text-4xl">{t("What do you want to do?")}</h2>
+      <p className="mt-2 max-w-2xl text-muted-foreground">{t("Pick a task. Each one walks you through the steps and tells you what comes next.")} {lang === "en" && "Not sure? Type it in your own words."}</p>
       <div className="mt-5 flex max-w-xl items-center gap-2 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm"><Search size={18} className="text-muted-foreground" /><input aria-label="Describe what you want to do" value={q} onChange={e => setQ(e.target.value)} placeholder="e.g. ship tiles to Germany, find my container, pay…" className="w-full bg-transparent outline-none" /></div>
       <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{hits.map(({ k, icon: I, t, d, href, who, c }) => <Link key={k} href={href} className={cn("group flex flex-col rounded-2xl border border-border bg-gradient-to-br to-card p-5 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg", c)}>
         <span className="grid h-11 w-11 place-items-center rounded-xl bg-card text-primary shadow-sm"><I size={22} /></span><span className="mt-4 font-semibold">{t}</span><span className="mt-1 flex-1 text-sm text-muted-foreground">{d}</span><span className="mt-4 flex items-center justify-between text-xs text-muted-foreground">{who}<ArrowRight size={16} className="text-primary transition group-hover:translate-x-1" /></span></Link>)}

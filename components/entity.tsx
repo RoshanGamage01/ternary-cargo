@@ -1,5 +1,7 @@
 "use client";
 import { DateField } from "./ui/date-field";
+import { iso6346 } from "@/lib/sscc";
+import { usePersist } from "@/lib/persist";
 import { toast as sonner } from "sonner";
 import { fmtDate } from "@/lib/date";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -32,6 +34,7 @@ export function validate(def: EntityDef, v: Record<string, string>, rows: Row[],
     else if (val && f.pattern && !f.pattern.test(val)) e[f.k] = f.patternMsg ?? "Invalid format";
     else if (val && f.type === "number" && isNaN(+val)) e[f.k] = "Must be a number";
   }
+  for (const k of Object.keys(v)) if (/container|equipment/i.test(k) && v[k]) { const m = v[k].toUpperCase().match(/[A-Z]{4}\s?\d{6}\s?\d/); if (m) { const c = iso6346(m[0]); if (c && !c.ok) e[k] = `Container number check digit is wrong: the last digit should be ${c.expected} (ISO 6346)`; } }
   const idv = v[def.idField];
   if (idv && rows.some(r => r[def.idField] === idv && r.id !== editingId)) e[def.idField] = `${idv} already exists`;
   return e;
@@ -141,7 +144,7 @@ function InlineCell({ value, onSave, mono, editable = true }: { value: string; o
 }
 export function EntityTable({ name, cols, extraActions, hideNew, presetFilter, computed, newHref, openNew }: { name: string; cols?: string[]; extraActions?: (r: Row) => React.ReactNode; hideNew?: boolean; presetFilter?: (r: Row) => boolean; computed?: { label: string; render: (r: Row) => React.ReactNode }[]; newHref?: string; openNew?: boolean }) {
   const def = entities[name];
-  const { db, ready, update, remove, toast, views, setViews, expert, getExtra, patchExtra, users } = { ...useStore(), users: useStore().db.users };
+  const { db, ready, update, remove, toast, views, setViews, expert, getExtra, patchExtra, users } = { ...useStore(), users: useStore().db.users }; const [permRole] = usePersist<string>("perm-role", "Operations manager");
   const all = useMemo(() => (db[def.key] as Row[]).filter(presetFilter ?? (() => true)), [db, def.key, presetFilter]);
   const columns0 = cols ?? def.fields.map(f => f.k);
   const saved = views[def.key] ?? [];
@@ -196,7 +199,7 @@ export function EntityTable({ name, cols, extraActions, hideNew, presetFilter, c
       <button onClick={() => { chosen.forEach(r => patchExtra(`${def.key}:${r[def.idField]}`, x => ({ ...x, tags: Array.from(new Set([...x.tags, "Priority"])) }))); toast(`Tagged ${chosen.length} as Priority`); setSel({}); }} className="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-background/10"><Tag size={14} />Tag “Priority”</button>
       <button onClick={() => bulk({ priority: "Urgent" }, "Marked urgent")} className="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-background/10"><UserPlus size={14} />Mark urgent</button>
       <button onClick={() => { downloadCSV(`${def.key}-selected`, chosen, visibleCols); toast(`Exported ${chosen.length} selected`); }} className="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-background/10"><Download size={14} />Export</button>
-      <button onClick={() => setDel(chosen)} className="flex items-center gap-1 rounded-lg px-2 py-1 text-red-300 hover:bg-background/10"><Trash2 size={14} />Delete</button>
+      <button disabled={permRole !== "Admin"} title={permRole !== "Admin" ? "Only Admins can bulk delete (Audit log → Signed in as)" : undefined} onClick={() => setDel(chosen)} className="flex items-center gap-1 rounded-lg px-2 py-1 text-red-300 hover:bg-background/10 disabled:cursor-not-allowed disabled:opacity-50"><Trash2 size={14} />Delete{permRole !== "Admin" && <span className="sr-only"> (Admins only)</span>}</button>
       <button onClick={() => setSel({})} className="ml-auto rounded-lg px-2 py-1 hover:bg-background/10">Clear</button></div>}
     {!ready || loading ? <Skeleton /> : filtered.length === 0 ? (all.length ? <div className="flex flex-col items-center gap-2 px-6 py-14 text-center"><p className="font-medium">No matches</p><p className="text-sm text-muted-foreground">Try clearing the search or the status filter.</p><Button variant="outline" onClick={() => applyView()}>Clear filters</Button></div> : <TeachEmpty k={def.key === "salesOrders" ? "manufacturing/orders" : def.key} title={`No ${def.title.toLowerCase()} yet`} action={<Button onClick={() => setForm({ open: true })}><Plus size={15} />New {def.singular}</Button>} />) :
       layout === "cards" ? <div className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3">{table.getRowModel().rows.map(({ original: r }) => <div key={r.id} className="group rounded-2xl border border-border bg-card p-4 transition hover:border-primary/40 hover:shadow-md">
