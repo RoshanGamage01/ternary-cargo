@@ -10,5 +10,5 @@ const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variab
 export const metadata = { title: "Ternary Cargo", icons: { icon: "/brand/ternary-favicon-colour.svg" } };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return <html lang="en" suppressHydrationWarning className={`${inter.variable} ${plex.variable} ${mono.variable}`}><body className="bg-background font-sans text-[15px] text-foreground antialiased">
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange><TooltipProvider delayDuration={150}><StoreProvider>{children}</StoreProvider></TooltipProvider><Toaster position="bottom-right" richColors closeButton /></ThemeProvider></body></html>;
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange><TooltipProvider delayDuration={150}><StoreProvider>{children}</StoreProvider></TooltipProvider><Toaster position="bottom-left" richColors closeButton offset={16} /></ThemeProvider></body></html>;
 }

@@ -47,18 +47,18 @@ test("QA-27: packing list weights and marks are editable before issue, locked af
   await expect(page.getByText("ACME / FRAGILE")).toBeVisible();
 });
 
-test("QA-09: menu filters by role, Expert shows everything", async ({ page }) => {
+test("QA-09 / N-01: one control sets detail level and job menu", async ({ page }) => {
   await go(page, "dashboard");
   const side = page.locator("aside");
-  await page.getByLabel("Menu for role").selectOption("Warehouse");
+  await page.getByRole("button", { name: "How much to show" }).click();
+  await page.getByRole("group", { name: "Menu for my job" }).getByRole("button", { name: "Warehouse" }).click();
   await expect(side.getByRole("link", { name: "Unload & count" })).toBeVisible();
   await expect(side.getByRole("link", { name: "Label cartons" })).toHaveCount(0);
-  await expect(side.getByText(/Showing \d+ of \d+ pages/)).toBeVisible();
-  await page.getByLabel("Expert mode").click();
+  await page.getByRole("group", { name: "Detail level" }).getByRole("button", { name: /Expert/ }).click();
   await expect(side.getByRole("link", { name: "Label cartons" })).toBeVisible();
-  await page.getByLabel("Expert mode").click();
-  await page.getByRole("button", { name: "Exporter", exact: true }).click();
-  await expect(page.getByLabel("Menu for role")).toHaveValue("Exporter");
-  await expect(side.getByRole("link", { name: "Label cartons" })).toBeVisible();
-  await expect(side.getByRole("link", { name: "Unload & count" })).toHaveCount(0);
+  await go(page, "shipments"); await expect(page.getByText("Need a hand?")).toBeVisible();
+  await page.getByRole("button", { name: "How much to show" }).click();
+  await page.getByRole("group", { name: "Detail level" }).getByRole("button", { name: /Simple/ }).click();
+  await expect(side.getByRole("link", { name: "Label cartons" })).toHaveCount(0);
+  await expect(page.getByLabel("Menu shows")).toHaveCount(0);
 });

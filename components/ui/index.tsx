@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn";
+import { fmtDate } from "@/lib/date";
 import React from "react";
 export function Card({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("rounded-2xl border border-border/80 bg-card shadow-[0_1px_2px_hsl(var(--foreground)/0.04),0_4px_16px_-8px_hsl(var(--foreground)/0.08)]", className)} {...p} />;
@@ -16,7 +17,7 @@ export function Badge({ tone = "slate", children }: { tone?: string; children: R
   return <span className={cn("inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-xs font-medium ring-1 ring-inset", tones[tone])}>{children}</span>;
 }
 export function Table({ cols, rows }: { cols: string[]; rows: React.ReactNode[][] }) {
-  return <div className="relative overflow-x-auto" tabIndex={0}><table className="w-full text-sm"><thead><tr className="border-y border-border bg-muted/40 text-left text-xs text-muted-foreground">{cols.map(c => <th key={c} className="px-5 py-3 font-medium">{c}</th>)}</tr></thead><tbody>{rows.map((r, i) => <tr key={i} className="border-b border-border last:border-0 hover:bg-muted">{r.map((c, j) => <td key={j} className="px-5 py-3 text-foreground">{c}</td>)}</tr>)}</tbody></table></div>;
+  return <div className="relative overflow-x-auto" tabIndex={0}><table className="w-full text-sm"><thead><tr className="border-y border-border bg-muted/40 text-left text-xs text-muted-foreground">{cols.map(c => <th key={c} className="px-5 py-3 font-medium">{c}</th>)}</tr></thead><tbody>{rows.map((r, i) => <tr key={i} className="border-b border-border last:border-0 hover:bg-muted">{r.map((c, j) => <td key={j} className="px-5 py-3 text-foreground tabular-nums">{typeof c === "string" ? fmtDate(c) : c}</td>)}</tr>)}</tbody></table></div>;
 }
 export function Field({ label, value, children }: { label: string; value?: string; children?: React.ReactNode }) {
   return <label className="block"><span className="mb-1 block text-xs font-medium text-muted-foreground">{label}</span>{children ?? <input defaultValue={value} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />}</label>;

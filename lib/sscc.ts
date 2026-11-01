@@ -11,7 +11,7 @@ export function makeSSCC(ext: number, serial: number) {
   return s17 + checkDigit(s17);
 }
 export const fmtSSCC = (s: string) => `(00) ${s.slice(0, 1)} ${s.slice(1, 8)} ${s.slice(8, 17)} ${s.slice(17)}`;
-/** ISO 6346 container number check digit (e.g. MSKU 774120 3). Returns null if format is wrong. */
+/** ISO 6346 container number check digit (e.g. MSKU 774120 6). Returns null if format is wrong. */
 export function iso6346(raw: string): { ok: boolean; expected?: number } | null {
   const c = raw.replace(/\s/g, "").toUpperCase(); if (!/^[A-Z]{4}\d{7}$/.test(c)) return null;
   const val = (ch: string) => { if (/\d/.test(ch)) return +ch; let v = ch.charCodeAt(0) - 55; for (const s of [11, 22, 33]) if (v >= s) v++; return v; };

@@ -106,17 +106,17 @@ export const GUIDES: Record<string, Guide> = {
   settings: { title: "Settings", why: "Users, permissions, your own fields, plan and demo data.", steps: ["Invite users and set roles", "Add custom fields for any record type", "Reset the demo whenever you like"], terms: ["Custom field"] },
 };
 export function GuideBanner({ k }: { k: string }) {
-  const { dismissed, dismiss } = useStore(); const g = GUIDES[k]; const [open, setOpen] = useState(false);
+  const { dismissed, dismiss, expert } = useStore(); const g = GUIDES[k]; const [open, setOpen] = useState(false);
   if (!g) return null;
-  const hidden = dismissed.includes(k);
+  const hidden = dismissed.includes(k) || expert;
   return <>
     {!hidden && <div className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-gradient-to-r from-accent/70 to-card p-4 no-print" role="note" aria-label="How this works">
       <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/15 text-primary"><PlayCircle size={20} /></div>
-      <div className="min-w-[220px] flex-1"><p className="font-semibold">{g.title}</p><p className="text-sm text-muted-foreground">{g.why}</p></div>
-      <ol className="hidden gap-3 xl:flex">{g.steps.map((s, i) => <li key={s} className="flex max-w-[190px] items-start gap-2 text-xs text-muted-foreground"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-card text-[11px] font-semibold text-primary ring-1 ring-border">{i + 1}</span>{s}</li>)}</ol>
+      <p className="shrink-0 text-sm font-semibold">How this page works</p>
+      <ol className="flex flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">{g.steps.map((s, i) => <li key={s} className="flex max-w-[190px] items-start gap-2 text-xs text-muted-foreground"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-card text-[11px] font-semibold text-primary ring-1 ring-border">{i + 1}</span>{s}</li>)}</ol>
       <div className="flex gap-1"><button onClick={() => setOpen(true)} className="rounded-lg px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10">Show me how</button><button aria-label="Hide guide" onClick={() => dismiss(k)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><X size={16} /></button></div>
     </div>}
-    {hidden && <button onClick={() => setOpen(true)} className="fixed bottom-5 left-5 z-30 hidden items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-sm hover:text-foreground lg:flex no-print"><HelpCircle size={14} />How this works</button>}
+    {hidden && <button onClick={() => setOpen(true)} className="mb-4 inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground no-print"><HelpCircle size={14} />Need a hand? <span className="font-medium text-primary underline underline-offset-2">Show me how</span></button>}
     <Sheet open={open} onOpenChange={setOpen}><SheetContent className="w-full sm:max-w-md"><SheetHeader><SheetTitle>{g.title}</SheetTitle><SheetDescription>{g.why}</SheetDescription></SheetHeader>
       <ol className="mt-6 space-y-4">{g.steps.map((s, i) => <li key={s} className="flex gap-3"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">{i + 1}</span><p className="pt-1 text-sm">{s}</p></li>)}</ol>
       {g.terms && <div className="mt-8"><p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Words used here</p><dl className="space-y-3">{g.terms.map(t => <div key={t} className="rounded-xl bg-muted/60 p-3"><dt className="text-sm font-semibold">{t}</dt><dd className="text-sm text-muted-foreground">{GLOSSARY[t]}</dd></div>)}</dl></div>}
@@ -133,4 +133,9 @@ export function TeachEmpty({ k, title, action }: { k: string; title?: string; ac
     {g && <ol className="mt-2 grid max-w-2xl gap-3 text-left sm:grid-cols-3">{g.steps.map((s, i) => <li key={s} className="rounded-xl border border-border bg-card p-3 text-xs text-muted-foreground"><span className="mb-1 block text-sm font-semibold text-primary">Step {i + 1}</span>{s}</li>)}</ol>}
     {action}
   </div>;
+}
+
+/** Visually separates demo-only controls (fake scanner) from real actions. */
+export function DemoBox({ children }: { children: React.ReactNode }) {
+  return <div className="rounded-xl border border-dashed border-warning/60 bg-warning/5 p-2.5" role="group" aria-label="Demo only"><p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-warning">Demo only · stands in for a handheld scanner</p>{children}</div>;
 }

@@ -1,5 +1,5 @@
 import { Page, expect } from "@playwright/test";
-export const SHOTS = "/workspace/cargo/qa";
+export const SHOTS = process.env.QA_SHOTS ?? "/workspace/cargo/qa";
 export const ROUTES = ["login","tenant","onboarding","dashboard","exceptions","manufacturing/orders","manufacturing/orders/SO-2026-0152","manufacturing/serialisation","manufacturing/palletising","manufacturing/packing-lists","manufacturing/load-plan","manufacturing/loading","manufacturing/receiving","quotations","bookings","shipments","shipments/new","shipments/TC-SEA-24121","consolidation","documents","customs","tracking","arrival","unloading","verification","scan","release","billing","reports","master-data","settings","portal/TC-SEA-24121"];
 export function watchConsole(page: Page) {
   const errs: string[] = [];
