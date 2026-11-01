@@ -10,7 +10,7 @@ export function CardHeader({ title, desc, action }: { title: string; desc?: stri
 type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "outline" | "ghost" | "danger" | "success" };
 export function Button({ className, variant = "primary", ...p }: BtnProps) {
   const v = { primary: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90", outline: "border border-border bg-card hover:bg-muted text-foreground", ghost: "hover:bg-muted text-foreground", danger: "bg-danger text-white hover:bg-danger/90", success: "bg-success text-white hover:bg-success/90" }[variant];
-  return <button className={cn("inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 disabled:opacity-50", v, className)} {...p} />;
+  return <button className={cn("inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition duration-[120ms] active:scale-[.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 disabled:opacity-50", v, className)} {...p} />;
 }
 const tones: Record<string, string> = { green: "bg-success/10 text-success ring-success/25", blue: "bg-info/10 text-info ring-info/25", amber: "bg-warning/10 text-warning ring-warning/25", red: "bg-danger/10 text-danger ring-danger/25", slate: "bg-muted text-muted-foreground ring-border", violet: "bg-primary/10 text-primary ring-primary/25", teal: "bg-primary/10 text-primary ring-primary/25", saffron: "bg-highlight/15 text-foreground ring-highlight/40" };
 export function Badge({ tone = "slate", children }: { tone?: string; children: React.ReactNode }) {
@@ -44,8 +44,13 @@ export function Modal({ open, title, onClose, children, footer }: { open: boolea
   if (!open) return null;
   return <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-label={title}><div className="absolute inset-0 bg-black/50" onClick={onClose} /><div className="relative w-full max-w-md rounded-xl bg-card shadow-2xl"><div className="border-b border-border px-5 py-4 font-semibold">{title}</div><div className="p-5 text-sm">{children}</div><div className="flex justify-end gap-2 border-t border-border px-5 py-3">{footer}</div></div></div>;
 }
+/** Pulli Grid 3×3 dot loader: dots light in kolam order. */
+export function DotLoader({ label = "Loading" }: { label?: string }) {
+  const order = [0, 1, 2, 5, 8, 7, 6, 3, 4];
+  return <span role="status" aria-label={label} className="inline-grid grid-cols-3 gap-1">{Array.from({ length: 9 }).map((_, i) => <span key={i} className="tc-dot h-1.5 w-1.5 rounded-full bg-primary" style={{ animationDelay: `${order.indexOf(i) * 100}ms` }} />)}</span>;
+}
 export function Skeleton({ rows = 6 }: { rows?: number }) {
-  return <div className="space-y-3 p-5" data-testid="skeleton">{Array.from({ length: rows }).map((_, i) => <div key={i} className="h-8 animate-pulse rounded bg-muted" />)}</div>;
+  return <div className="space-y-2 p-5" data-testid="skeleton"><div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground"><DotLoader />Loading…</div>{Array.from({ length: rows }).map((_, i) => <div key={i} className="h-9 animate-pulse rounded bg-muted" />)}</div>;
 }
 export function Empty({ title, hint, action }: { title: string; hint?: string; action?: React.ReactNode }) {
   return <div className="flex flex-col items-center gap-2 px-6 py-14 text-center"><div className="grid h-12 w-12 place-items-center rounded-full bg-muted text-xl">∅</div><p className="font-medium">{title}</p>{hint && <p className="max-w-sm text-sm text-muted-foreground">{hint}</p>}{action}</div>;

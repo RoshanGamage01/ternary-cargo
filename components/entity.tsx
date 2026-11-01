@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { DateField } from "./ui/date-field";
 import { iso6346 } from "@/lib/sscc";
 import { usePersist } from "@/lib/persist";
@@ -89,8 +90,8 @@ export function RecordSheet({ def, row, onClose }: { def: EntityDef; row: Row | 
   const live = row ? (db[def.key] as Row[]).find(r => r.id === row.id) ?? row : null;
   const [tab, setTab] = useState("Details"); const [v, setV] = useState<Record<string, string>>({}); const [err, setErr] = useState<Record<string, string>>({});
   const [note, setNote] = useState(""); const [ov, setOv] = useState({ k: "", to: "", reason: "" }); const [ovErr, setOvErr] = useState(""); const [tag, setTag] = useState("");
-  const fileRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { if (row) { setV({ ...row }); setErr({}); setTab("Details"); } }, [row]);
+  const fileRef = useRef<HTMLInputElement>(null); const [editAll, setEditAll] = useState(false);
+  useEffect(() => { if (row) { setV({ ...row }); setErr({}); setTab("Details"); setEditAll(false); } }, [row]);
   if (!live) return <Sheet open={false} />;
   const key = `${def.key}:${live[def.idField]}`; const ex = getExtra(key); const id = live[def.idField];
   const hist = events.filter(e => e.ref === id || e.text.includes(id)).slice(0, 40);
@@ -111,7 +112,8 @@ export function RecordSheet({ def, row, onClose }: { def: EntityDef; row: Row | 
     <div className="relative flex gap-1 overflow-x-auto border-b border-border px-6">{tabs.map(x => <button key={x} onClick={() => setTab(x)} aria-pressed={tab === x} className={cn("-mb-px whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium", t === x.split(" ")[0] ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>{x}</button>)}</div>
     <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
       {(isShip || isOrder) && t === "Details" && <NextAction a={isShip ? shipNext(live) : orderNext(live)} onRun={() => { const to = isShip ? "Delivered" : "Released to production"; update(def.key, live.id, { status: to }); toast(`${id} → ${to}`); }} />}
-      {t === "Details" && <><RecordFields def={def} v={v} setV={setV} err={err} />{def.link && <Link href={def.link(live)} className="inline-block text-sm text-primary">Open full page →</Link>}</>}
+      {t === "Details" && !editAll && <ReadView fields={allFields} row={live} onSave={(k, val) => { const prev = live[k] ?? ""; const e = validate(def, { ...live, [k]: val } as Record<string, string>, db[def.key] as Row[], live.id, allFields.slice(def.fields.length)); if (e[k]) { toast(e[k], "err"); return false; } update(def.key, live.id, { [k]: val }); setV(x => ({ ...x, [k]: val })); log(id, `${allFields.find(f => f.k === k)?.label ?? k} changed to “${val}”`); undoToast(`${id}: ${allFields.find(f => f.k === k)?.label ?? k} saved`, () => { update(def.key, live.id, { [k]: prev }); setV(x => ({ ...x, [k]: prev })); }); return true; }} />}
+      {t === "Details" && editAll && <><RecordFields def={def} v={v} setV={setV} err={err} />{def.link && <Link href={def.link(live)} className="inline-block text-sm text-primary">Open full page →</Link>}</>}
       {t === "Override" && <div className="space-y-4"><p className="text-sm text-muted-foreground">Replace a value with your own when the system or a partner got it wrong. We keep the original value, your reason and your name, and you can undo it any time.</p>
         <div className="grid gap-3 sm:grid-cols-2"><label className="block text-sm"><span className="mb-1.5 block text-[13px] font-medium">Field</span><select aria-label="Override field" value={ov.k} onChange={e => setOv({ ...ov, k: e.target.value, to: live[e.target.value] ?? "" })} className="h-10 w-full rounded-xl border border-input bg-card px-3"><option value="">Choose…</option>{allFields.filter(f => f.k !== def.idField).map(f => <option key={f.k} value={f.k}>{f.label}</option>)}</select></label><label className="block text-sm"><span className="mb-1.5 block text-[13px] font-medium">New value</span><input aria-label="Override value" value={ov.to} onChange={e => setOv({ ...ov, to: e.target.value })} className="h-10 w-full rounded-xl border border-input bg-card px-3" /></label></div>
         <label className="block text-sm"><span className="mb-1.5 block text-[13px] font-medium">Reason <span className="text-danger">*</span></span><textarea aria-label="Override reason" value={ov.reason} onChange={e => setOv({ ...ov, reason: e.target.value })} rows={2} placeholder="e.g. Carrier emailed a new arrival date" className="w-full rounded-xl border border-input bg-card px-3 py-2" /></label>
@@ -124,7 +126,7 @@ export function RecordSheet({ def, row, onClose }: { def: EntityDef; row: Row | 
         {ex.files.length === 0 ? <p className="text-sm text-muted-foreground">No files yet. Attach invoices, photos or emails so everything about this record is in one place.</p> : <ul className="divide-y divide-border rounded-xl border border-border">{ex.files.map(f => <li key={f.id} className="flex items-center justify-between px-3 py-2 text-sm"><span className="flex items-center gap-2"><Paperclip size={14} className="text-muted-foreground" />{f.name}<span className="text-xs text-muted-foreground">{f.size}</span></span><button aria-label={`Remove ${f.name}`} onClick={() => patchExtra(key, x => ({ ...x, files: x.files.filter(y => y.id !== f.id) }))} className="text-xs text-danger">Remove</button></li>)}</ul>}</div>}
       {t === "History" && (hist.length === 0 ? <p className="text-sm text-muted-foreground">No changes recorded yet. Every edit, override, note and file will appear here.</p> : <ol className="relative space-y-4 border-l border-border pl-5">{hist.map(e => <li key={e.id} className="text-sm"><span className="absolute -left-[5px] mt-1.5 h-2.5 w-2.5 rounded-full bg-primary" /><p>{e.text}</p><p className="text-xs text-muted-foreground">{e.actor} · {new Date(e.at).toLocaleString("en-GB")} · {e.source}</p></li>)}</ol>)}
     </div>
-    {t === "Details" && <div className="flex justify-end gap-2 border-t border-border px-6 py-4"><Button variant="outline" onClick={onClose}>Close</Button><Button onClick={save} data-testid="sheet-save">Save changes</Button></div>}
+    {t === "Details" && <div className="flex justify-end gap-2 border-t border-border px-6 py-4"><Button variant="outline" onClick={onClose}>Close</Button>{editAll ? <><Button variant="ghost" onClick={() => { setV({ ...live }); setEditAll(false); }}>Cancel</Button><Button onClick={() => { save(); setEditAll(false); }} data-testid="sheet-save">Save changes</Button></> : <Button variant="outline" onClick={() => setEditAll(true)}><Pencil size={14} />Edit all</Button>}</div>}
   </SheetContent></Sheet>;
 }
 
@@ -135,6 +137,12 @@ function StatusChip({ value, options, onChange, id }: { value: string; options: 
   const [open, setOpen] = useState(false);
   return <Popover open={open} onOpenChange={setOpen}><PopoverTrigger asChild><button aria-label={`Change status of ${id}: ${value}`} className={cn("inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset transition-colors duration-150", TONE[toneOf(value)])}>{value}<ChevronDown size={12} className="opacity-60" /></button></PopoverTrigger>
     <PopoverContent align="start" className="w-48 p-1"><p className="px-2 py-1 text-[11px] font-semibold uppercase text-muted-foreground">Change status</p>{options.map(o => <button key={o} aria-pressed={o === value} onClick={() => { setOpen(false); if (o !== value) onChange(o); }} className={cn("flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted", o === value && "font-semibold text-primary")}>{o}{o === value && <Check size={14} />}</button>)}</PopoverContent></Popover>;
+}
+function ReadView({ fields, row, onSave }: { fields: FieldDef[]; row: Row; onSave: (k: string, v: string) => boolean }) {
+  const [ed, setEd] = useState<string | null>(null); const [val, setVal] = useState("");
+  return <dl className="grid grid-cols-[minmax(110px,150px)_1fr] items-center gap-x-4 gap-y-1 text-sm" aria-label="Record details">{fields.map(f => <React.Fragment key={f.k}><dt className="py-1.5 text-muted-foreground">{f.label}</dt><dd className="min-w-0">{ed === f.k
+    ? (f.type === "date" ? <DateField label={f.label} value={val} onChange={d => { if (onSave(f.k, d)) setEd(null); }} /> : <input autoFocus aria-label={`Edit ${f.label}`} value={val} onChange={e => setVal(e.target.value)} onBlur={() => { if (val !== (row[f.k] ?? "")) { if (onSave(f.k, val)) setEd(null); } else setEd(null); }} onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") setEd(null); }} className="h-9 w-full rounded-lg border border-primary bg-card px-2 outline-none ring-4 ring-primary/10" />)
+    : <button aria-label={`Edit ${f.label}: ${row[f.k] || "empty"}`} onClick={() => { setVal(row[f.k] ?? ""); setEd(f.k); }} className="group flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted"><span className={cn("truncate", !row[f.k] && "text-muted-foreground")}>{row[f.k] ? fmtDate(row[f.k]) : "—"}</span><Pencil size={13} className="shrink-0 opacity-0 transition-opacity duration-150 group-hover:opacity-60" /></button>}</dd></React.Fragment>)}</dl>;
 }
 function InlineCell({ value, onSave, mono, editable = true }: { value: string; onSave: (v: string) => void; mono?: boolean; editable?: boolean }) {
   const [ed, setEd] = useState(false); const [v, setV] = useState(value);
@@ -192,7 +200,7 @@ export function EntityTable({ name, cols, extraActions, hideNew, presetFilter, c
       <Button variant="outline" onClick={() => window.print()}><Printer size={15} />PDF</Button>
       {!hideNew && newHref && <Link href={newHref}><Button><Plus size={15} />New {def.singular}</Button></Link>}{!hideNew && !newHref && <Button onClick={() => setForm({ open: true })}><Plus size={15} />New {def.singular}</Button>}
     </div>
-    {chosen.length > 0 && <div className="mx-4 mb-3 flex flex-wrap items-center gap-2 rounded-xl bg-foreground px-4 py-2 text-sm text-background no-print" role="region" aria-label="Bulk actions">
+    {chosen.length > 0 && <div className="tc-rise mx-4 mb-3 mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-foreground px-4 py-2 text-sm text-background no-print" role="region" aria-label="Bulk actions">
       <span className="font-medium">{chosen.length} selected</span><span className="opacity-40">|</span>
       {def.statuses.length > 0 && <select aria-label="Bulk change status" defaultValue="" onChange={e => { if (e.target.value) bulk({ status: e.target.value }, `Status → ${e.target.value}`); e.target.value = ""; }} className="h-8 rounded-lg bg-background/10 px-2 text-sm text-background"><option value="" className="text-foreground">Change status…</option>{def.statuses.map(s => <option key={s} className="text-foreground">{s}</option>)}</select>}
       <select aria-label="Bulk assign" defaultValue="" onChange={e => { if (e.target.value) bulk({ assignee: e.target.value }, `Assigned to ${e.target.value}`); e.target.value = ""; }} className="h-8 rounded-lg bg-background/10 px-2 text-sm text-background"><option value="" className="text-foreground">Assign to…</option>{users.map(u => <option key={u.id} className="text-foreground">{u.name}</option>)}</select>

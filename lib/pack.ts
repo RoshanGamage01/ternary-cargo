@@ -9,9 +9,12 @@ export type Item = { id: string; l: number; w: number; h: number; kg: number; gr
 export type Placed = Item & { x: number; y: number; z: number; L: number; W: number };
 // Greedy wall-building heuristic: sort by height then footprint; fill across width, then stack layers, then advance along length.
 // Tries both orientations of the footprint. Not an optimiser.
-export function pack(items: Item[], spaceKey: string, ov: Partial<{ L: number; W: number; H: number; payload: number }> = {}) {
+export const autoOrder = (items: Item[]) => [...items].sort((a, b) => b.h - a.h || b.l * b.w - a.l * a.w);
+/** seq: optional user load order (item ids, first = loaded first, ends up at the nose). */
+export function pack(items: Item[], spaceKey: string, ov: Partial<{ L: number; W: number; H: number; payload: number }> = {}, seq?: string[]) {
   const S = { ...SPACES[spaceKey], ...Object.fromEntries(Object.entries(ov).filter(([, v]) => v && v > 0)) };
-  const sorted = [...items].sort((a, b) => b.h - a.h || b.l * b.w - a.l * a.w);
+  const ix = seq ? new Map(seq.map((id, i) => [id, i])) : null;
+  const sorted = ix ? [...autoOrder(items)].sort((a, b) => (ix.get(a.id) ?? 1e9) - (ix.get(b.id) ?? 1e9)) : autoOrder(items);
   const placed: Placed[] = []; const unplaced: Item[] = [];
   let x = 0, y = 0, z = 0, rowDepth = 0, layerH = 0, kg = 0;
   for (const it of sorted) {

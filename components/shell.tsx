@@ -1,9 +1,11 @@
 "use client";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useLang, LANGS } from "@/lib/i18n";
+import { usePersist } from "@/lib/persist";
+import { Command as Cmd } from "cmdk";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { LayoutDashboard, Database, Ship, Boxes, FileStack, ShieldCheck, MapPin, Bell, PackageOpen, ClipboardCheck, Truck, Receipt, BarChart3, Settings, Search, Calculator, Factory, Barcode, Layers, ListChecks, Container, PackageCheck, Moon, Sun, Menu, Sparkles, AlertOctagon, Smartphone, ChevronRight, CalendarCheck, Globe, Compass, BookOpen, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, ChevronDown, FileCheck2, MessageCircle, BellRing, Camera, Wallet, Upload, History, BookMarked } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useStore } from "@/lib/store";
@@ -28,8 +30,12 @@ export const showInMenu = (k: string, role: string, expert: boolean) => expert |
 const flat = nav.flatMap(g => g.items.map(([k, l]) => ({ k, l, g: g.group || "Home" })));
 export function Shell({ active, title, subtitle, actions, children, crumbs }: { active: string; title: string; subtitle?: string; actions?: React.ReactNode; children: React.ReactNode; crumbs?: [string, string?][] }) {
   const { palette, setPalette, dark, setDark, notifs, markRead, expert, setExpert, role, setRole } = useStore(); const { lang, setLang, t } = useLang();
+  const router = useRouter(); useEffect(() => { const h = () => setAi(true); window.addEventListener("tc-ask", h); return () => window.removeEventListener("tc-ask", h); }, []);
   const [mob, setMob] = useState(false); const [np, setNp] = useState(false); const [ai, setAi] = useState(false); const [collapsed, setCollapsed] = useState(false);
-  useEffect(() => { const h = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette(true); } if (e.key === "Escape") { setPalette(false); setNp(false); } }; window.addEventListener("keydown", h); return () => window.removeEventListener("keydown", h); }, [setPalette]);
+  useEffect(() => { const h = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette(true); } if (e.key === "Escape") { setPalette(false); setNp(false); }
+      const tg = e.target as HTMLElement; if (tg && (tg.closest("input, textarea, select, [contenteditable=true]"))) return; if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "/") { e.preventDefault(); setPalette(true); } else if (e.key === "?") { window.dispatchEvent(new Event("tc-shortcuts")); } else if (e.key === "n" || e.key === "N") { if (!(window as unknown as { __g?: boolean }).__g) router.push("/shipments/new"); }
+      const w = window as unknown as { __g?: boolean; __gt?: ReturnType<typeof setTimeout> }; if (w.__g) { w.__g = false; if (e.key === "s") router.push("/shipments"); if (e.key === "d") router.push("/dashboard"); } else if (e.key === "g") { w.__g = true; clearTimeout(w.__gt); w.__gt = setTimeout(() => { w.__g = false; }, 1200); } }; window.addEventListener("keydown", h); return () => window.removeEventListener("keydown", h); }, [setPalette]);
   const group = flat.find(f => f.k === active)?.g;
   const unread = notifs.filter(n => !n.read).length;
   const gk = title === "New shipment" ? "shipments/new" : active;
@@ -67,24 +73,50 @@ export function Shell({ active, title, subtitle, actions, children, crumbs }: { 
         {plain && <GuideBanner k={gk} />}
         {children}</main>
     </div>
-    {palette && <Palette onClose={() => setPalette(false)} />}
+    {palette && <Palette onClose={() => setPalette(false)} />}<Shortcuts />
     {ai && <Assistant onClose={() => setAi(false)} />}
   </div>;
 }
+const KBD = ({ k }: { k: string }) => <kbd className="rounded border border-border bg-muted px-1.5 font-mono text-[11px] text-muted-foreground">{k}</kbd>;
 function Palette({ onClose }: { onClose: () => void }) {
-  const { db } = useStore(); const router = useRouter(); const [q, setQ] = useState(""); const [i, setI] = useState(0);
-  const items = useMemo(() => {
-    const pages = flat.map(f => ({ label: f.l, sub: f.g, href: `/${f.k}` }));
-    const recs = [...db.shipments.map(s => ({ label: s.ref, sub: `Shipment · ${s.doc} · ${s.consignee}`, href: `/shipments/${s.ref}` })), ...db.salesOrders.map(s => ({ label: s.ref, sub: `Sales order · ${s.buyer}`, href: `/manufacturing/orders/${s.ref}` })), ...db.customers.map(c => ({ label: c.name, sub: `Customer · ${c.code}`, href: "/master-data?tab=customers" })), ...db.pallets.map(p => ({ label: p.sscc, sub: `Pallet SSCC · ${p.so}`, href: "/manufacturing/palletising" })), ...db.invoices.map(v => ({ label: v.ref, sub: `Invoice · ${v.customer}`, href: "/billing" }))];
-    const actions = [{ label: "Start here: what do you want to do?", sub: "Action", href: "/start" }, { label: "Open glossary", sub: "Help", href: "/glossary" }, { label: "New shipment", sub: "Action", href: "/shipments/new" }, { label: "New sales order", sub: "Action", href: "/manufacturing/orders?new=1" }, { label: "Open 3D load planner", sub: "Action", href: "/manufacturing/load-plan" }, { label: "Onboard a new tenant", sub: "Action", href: "/onboarding" }];
-    const all = [...actions, ...pages, ...recs];
-    return q ? all.filter(x => (x.label + x.sub).toLowerCase().includes(q.toLowerCase())).slice(0, 12) : all.slice(0, 10);
-  }, [q, db]);
-  const go = (h: string) => { onClose(); router.push(h); };
-  return <div className="fixed inset-0 z-[70] flex items-start justify-center bg-black/50 pt-24" onClick={onClose}><div className="w-full max-w-xl overflow-hidden rounded-xl bg-card shadow-2xl" onClick={e => e.stopPropagation()}>
-    <div className="flex items-center gap-2 border-b border-border px-4"><Search size={16} className="text-muted-foreground" /><input autoFocus aria-label="Command palette search" value={q} onChange={e => { setQ(e.target.value); setI(0); }} onKeyDown={e => { if (e.key === "ArrowDown") setI(Math.min(i + 1, items.length - 1)); if (e.key === "ArrowUp") setI(Math.max(i - 1, 0)); if (e.key === "Enter" && items[i]) go(items[i].href); }} placeholder="Type a command or search…" className="w-full py-3 text-sm outline-none bg-transparent" /></div>
-    <ul className="max-h-80 overflow-y-auto py-1">{items.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted-foreground">No results for “{q}”</li>}{items.map((x, j) => <li key={x.label + j}><button onMouseEnter={() => setI(j)} onClick={() => go(x.href)} className={cn("flex w-full items-center justify-between px-4 py-2 text-left text-sm", j === i && "bg-accent")}><span className="font-medium">{x.label}</span><span className="text-xs text-muted-foreground">{x.sub}</span></button></li>)}</ul>
-    <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">↑↓ to navigate · Enter to open · Esc to close</p></div></div>;
+  const { db, setDark, dark, expert, setExpert, setPalette } = useStore(); const router = useRouter(); const [q, setQ] = useState(""); const { setLang } = useLang();
+  const [recent, setRecent] = usePersist<{ label: string; href: string }[]>("recent", []);
+  const go = (label: string, h: string) => { setRecent(r => [{ label, href: h }, ...r.filter(x => x.href !== h)].slice(0, 5)); onClose(); router.push(h); };
+  const mac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+  const actions: { label: string; k?: string; run: () => void }[] = [
+    { label: "New shipment", k: "N", run: () => go("New shipment", "/shipments/new") },
+    { label: "Import a spreadsheet", run: () => go("Import data", "/import") },
+    { label: "Open the customs pack for TC-SEA-24121", run: () => go("Customs pack", "/customs/pack?ref=TC-SEA-24121") },
+    { label: "Share a WhatsApp update", run: () => go("Share update", "/shipments/TC-SEA-24121") },
+    { label: "Start here: what do you want to do?", run: () => go("Start here", "/start") },
+    { label: dark ? "Switch to light mode" : "Switch to dark mode", run: () => { setDark(!dark); onClose(); } },
+    { label: expert ? "Switch to Simple" : "Switch to Expert", run: () => { setExpert(!expert); onClose(); } },
+    { label: "Language: English", run: () => { setLang("en"); onClose(); } }, { label: "Language: සිංහල (Sinhala)", run: () => { setLang("si"); onClose(); } }, { label: "Language: தமிழ் (Tamil)", run: () => { setLang("ta"); onClose(); } },
+    { label: "Show keyboard shortcuts", k: "?", run: () => { onClose(); setTimeout(() => window.dispatchEvent(new Event("tc-shortcuts")), 0); } },
+  ];
+  const recs = [...db.shipments.map(s => ({ label: s.ref, sub: `Shipment · ${s.doc} · ${s.consignee}`, href: `/shipments/${s.ref}` })), ...db.salesOrders.map(s => ({ label: s.ref, sub: `Export order · ${s.buyer}`, href: `/manufacturing/orders/${s.ref}` })), ...db.customers.map(c => ({ label: c.name, sub: `Customer · ${c.code}`, href: "/master-data?tab=customers" })), ...db.pallets.map(p => ({ label: p.sscc, sub: `Pallet barcode · ${p.so}`, href: "/manufacturing/palletising" })), ...db.invoices.map(v => ({ label: v.ref, sub: `Invoice · ${v.customer}`, href: "/billing" }))];
+  const item = "flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground";
+  void setPalette;
+  return <div className="fixed inset-0 z-[70] flex items-start justify-center bg-black/50 px-3 pt-24 animate-in fade-in-0 duration-150" onClick={onClose}><div className="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-card shadow-2xl animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+    <Cmd label="Command menu" loop onKeyDown={e => { if (e.key === "Escape") onClose(); }}>
+      <div className="flex items-center gap-2 border-b border-border px-4"><Search size={16} className="text-muted-foreground" /><Cmd.Input autoFocus aria-label="Command palette search" value={q} onValueChange={setQ} placeholder="Type a command, a page, or a reference…" className="w-full bg-transparent py-3 text-sm outline-none" /><KBD k="Esc" /></div>
+      <Cmd.List className="max-h-[22rem] overflow-y-auto p-1.5">
+        <Cmd.Empty className="px-4 py-6 text-center text-sm text-muted-foreground">No match. <button className="text-primary underline" onClick={() => { onClose(); window.dispatchEvent(new CustomEvent("tc-ask", { detail: q })); }}>Ask Ternary “{q}”</button></Cmd.Empty>
+        {!q && recent.length > 0 && <Cmd.Group heading="Recent" className="px-1 py-1 text-[11px] font-semibold uppercase text-muted-foreground [&_[cmdk-item]]:normal-case">{recent.map(r => <Cmd.Item key={"r" + r.href} value={"recent " + r.label + r.href} onSelect={() => go(r.label, r.href)} className={item}><span className="font-medium text-foreground">{r.label}</span><span className="text-xs">{r.href}</span></Cmd.Item>)}</Cmd.Group>}
+        <Cmd.Group heading="Actions" className="px-1 py-1 text-[11px] font-semibold uppercase text-muted-foreground">{actions.map(a => <Cmd.Item key={a.label} value={a.label} onSelect={a.run} className={item + " normal-case"}><span className="font-medium text-foreground">{a.label}</span>{a.k && <KBD k={a.k} />}</Cmd.Item>)}</Cmd.Group>
+        <Cmd.Group heading="Go to" className="px-1 py-1 text-[11px] font-semibold uppercase text-muted-foreground">{flat.map(f => <Cmd.Item key={f.k} value={`${f.l} ${f.g}`} onSelect={() => go(f.l, `/${f.k}`)} className={item + " normal-case"}><span className="font-medium text-foreground">{f.l}</span><span className="text-xs">{f.k === "shipments" ? <KBD k="G S" /> : f.k === "dashboard" ? <KBD k="G D" /> : f.g}</span></Cmd.Item>)}</Cmd.Group>
+        {q && <Cmd.Group heading="Records" className="px-1 py-1 text-[11px] font-semibold uppercase text-muted-foreground">{recs.map((r, i) => <Cmd.Item key={r.label + i} value={`${r.label} ${r.sub}`} onSelect={() => go(r.label, r.href)} className={item + " normal-case"}><span className="font-mono text-[13px] font-medium text-foreground">{r.label}</span><span className="truncate text-xs">{r.sub}</span></Cmd.Item>)}</Cmd.Group>}
+      </Cmd.List>
+      <p className="flex flex-wrap gap-3 border-t border-border px-4 py-2 text-[11px] text-muted-foreground"><span><KBD k="↑↓" /> move</span><span><KBD k="Enter" /> open</span><span><KBD k={mac ? "⌘K" : "Ctrl K"} /> or <KBD k="/" /> open this</span><span><KBD k="?" /> all shortcuts</span></p>
+    </Cmd>
+  </div></div>;
+}
+function Shortcuts() {
+  const [open, setOpen] = useState(false);
+  useEffect(() => { const h = () => setOpen(true); window.addEventListener("tc-shortcuts", h); return () => window.removeEventListener("tc-shortcuts", h); }, []);
+  if (!open) return null;
+  const rows: [string, string][] = [["Ctrl K, ⌘K or /", "Open the command menu"], ["G then S", "Go to shipments"], ["G then D", "Go to the overview"], ["N", "New shipment"], ["?", "Show this list"], ["Esc", "Close menus and panels"]];
+  return <div className="fixed inset-0 z-[75] grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" onClick={() => setOpen(false)}><div className="w-full max-w-sm rounded-xl bg-card p-5 shadow-xl" onClick={e => e.stopPropagation()}><p className="mb-3 font-semibold">Keyboard shortcuts</p><ul className="space-y-2 text-sm">{rows.map(([k, d]) => <li key={k} className="flex justify-between gap-4"><span>{d}</span><KBD k={k} /></li>)}</ul><button className="mt-4 w-full rounded-xl border border-border py-2 text-sm hover:bg-muted" onClick={() => setOpen(false)}>Close</button></div></div>;
 }
 function Assistant({ onClose }: { onClose: () => void }) {
   const { db } = useStore();

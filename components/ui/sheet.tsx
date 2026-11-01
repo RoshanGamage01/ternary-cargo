@@ -61,6 +61,7 @@ const SheetContent = React.forwardRef<
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
+      onInteractOutside={(e) => { if ((e.target as HTMLElement)?.closest?.("[data-sonner-toaster]")) e.preventDefault(); }}
       className={cn(sheetVariants({ side }), className)}
       {...props}
     >
