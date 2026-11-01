@@ -48,7 +48,7 @@ test("record opens read-first; click a field to edit with undo", async ({ page }
   await page.getByRole("button", { name: /^Open BK-/ }).first().click();
   const dl = page.getByRole("definition").first(); await expect(dl).toBeVisible();
   const btn = page.getByRole("button", { name: /^Edit Vessel/ }).first();
-  if (await btn.count()) { await btn.click(); const ip = page.getByLabel(/^Edit Vessel/); await ip.fill("MSC ANNA / 612E"); await ip.press("Tab");
+  await expect(btn).toBeVisible(); { await btn.click(); const ip = page.getByLabel(/^Edit Vessel/); await ip.fill("MSC ANNA / 612E"); await ip.press("Tab");
     await expect(page.getByRole("button", { name: "Edit Vessel / flight: MSC ANNA / 612E" })).toBeVisible();
     await page.getByRole("button", { name: "Undo" }).click(); await expect(page.getByRole("button", { name: "Edit Vessel / flight: MSC ANNA / 612E" })).toHaveCount(0); }
   await page.getByRole("button", { name: "Edit all" }).click(); await expect(page.getByTestId("sheet-save")).toBeVisible();

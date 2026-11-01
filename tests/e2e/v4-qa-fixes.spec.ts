@@ -30,10 +30,10 @@ test("V4-02: deletes and overrides are written to the audit log with who and rol
   await page.getByLabel("Override payload").fill("26000"); await page.getByLabel("Override reason").fill("Carrier spec sheet MSKU"); await page.waitForTimeout(1700);
   await go(page, "audit");
   const log = page.getByRole("main");
-  await page.getByLabel("Search audit log").fill("Deleted shipments record TC-SEA-24118"); await expect(log.getByText("Deleted shipments record TC-SEA-24118")).toBeVisible(); await expect(log.getByText(/Nimal Perera \(Admin\)/).first()).toBeVisible();
+  await page.getByLabel("Search audit log").fill("Deleted shipment TC-SEA-24118"); await expect(log.getByText("Deleted shipment TC-SEA-24118", { exact: true })).toBeVisible(); await expect(log.getByText(/Nimal Perera \(Admin\)/).first()).toBeVisible();
   await page.getByLabel("Search audit log").fill("OVR-VALUE-1"); await expect(log.getByText(/Override .*OVR-VALUE-1.*Carrier confirmed by phone call/)).toBeVisible();
   await page.getByLabel("Search audit log").fill("Override container"); await expect(log.getByText(/Override container .*payload=26000.*Carrier spec sheet MSKU/)).toBeVisible();
-  await page.getByLabel("Search audit log").fill(""); await page.getByLabel("Audit source").selectOption("delete"); await expect(log.getByText("Deleted shipments record TC-SEA-24118")).toBeVisible();
+  await page.getByLabel("Search audit log").fill(""); await page.getByLabel("Audit source").selectOption("delete"); await expect(log.getByText("Deleted shipment TC-SEA-24118", { exact: true })).toBeVisible();
 });
 
 test("V4-03: pallet labels are A6 GS1-128 labels, one per pallet, SSCC with a single (00)", async ({ page }) => {

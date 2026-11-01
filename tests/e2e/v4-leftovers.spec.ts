@@ -3,12 +3,12 @@ import { go } from "./helpers";
 
 test("booklet PDF linked from Help, glossary and Incoterm help", async ({ page, request }) => {
   await go(page, "help?ch=incoterms");
-  const l = page.getByRole("link", { name: /Beginner's booklet \(PDF\)/ }).first();
+  const l = page.getByRole("link", { name: /Beginner's booklet \(PDF, 6\.3 MB\)/ }).first();
   await expect(l).toHaveAttribute("href", "/booklet/Ternary-Cargo-Beginners-Booklet.pdf");
   await expect(page.getByRole("link", { name: /chapter 8, from page 27/ })).toHaveAttribute("href", /#page=27$/);
   expect((await request.get("/booklet/Ternary-Cargo-Beginners-Booklet.pdf")).headers()["content-type"]).toContain("pdf");
   await go(page, "glossary");
-  await expect(page.getByRole("link", { name: /Beginner's booklet \(PDF\)/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Beginner's booklet \(PDF, 6\.3 MB\)/ })).toBeVisible();
 });
 
 test("design 7: ? tooltip for other names, ⓘ Estimate label", async ({ page }) => {
