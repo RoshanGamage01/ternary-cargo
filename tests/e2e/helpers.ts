@@ -1,6 +1,6 @@
 import { Page, expect } from "@playwright/test";
 export const SHOTS = process.env.QA_SHOTS ?? "/workspace/cargo/qa";
-export const ROUTES = ["login","tenant","onboarding","dashboard","exceptions","manufacturing/orders","manufacturing/orders/SO-2026-0152","manufacturing/serialisation","manufacturing/palletising","manufacturing/packing-lists","manufacturing/load-plan","manufacturing/loading","manufacturing/receiving","quotations","bookings","shipments","shipments/new","shipments/TC-SEA-24121","consolidation","documents","customs","tracking","arrival","unloading","verification","scan","release","billing","reports","master-data","settings","portal/TC-SEA-24121"];
+export const ROUTES = ["login","tenant","onboarding","dashboard","exceptions","manufacturing/orders","manufacturing/orders/SO-2026-0152","manufacturing/serialisation","manufacturing/palletising","manufacturing/packing-lists","manufacturing/load-plan","manufacturing/loading","manufacturing/receiving","quotations","bookings","shipments","shipments/new","shipments/TC-SEA-24121","consolidation","documents","customs","tracking","arrival","unloading","verification","scan","release","billing","reports","master-data","settings","portal/TC-SEA-24121","import","customs/pack","whatsapp","finance","evidence","audit","alerts","help"];
 export function watchConsole(page: Page) {
   const errs: string[] = [];
   page.on("console", m => { if (m.type() === "error") errs.push(m.text().slice(0, 200)); });
