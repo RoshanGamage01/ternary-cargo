@@ -3,9 +3,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useLang, LANGS } from "@/lib/i18n";
 import { usePersist } from "@/lib/persist";
 import { Command as Cmd } from "cmdk";
+import * as D from "@radix-ui/react-dialog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Home as HomeIcon, LayoutDashboard, Database, Ship, Boxes, FileStack, ShieldCheck, MapPin, Bell, PackageOpen, ClipboardCheck, Truck, Receipt, BarChart3, Settings, Search, Calculator, Factory, Barcode, Layers, ListChecks, Container, PackageCheck, Moon, Sun, Menu, Sparkles, AlertOctagon, Smartphone, ChevronRight, CalendarCheck, Globe, Compass, BookOpen, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, ChevronDown, FileCheck2, MessageCircle, BellRing, Camera, Wallet, Upload, History, BookMarked } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useStore } from "@/lib/store";
@@ -30,6 +31,9 @@ export const showInMenu = (k: string, role: string, expert: boolean) => expert |
 const flat = nav.flatMap(g => g.items.map(([k, l]) => ({ k, l, g: g.group || "Home" })));
 export function Shell({ active, title, subtitle, actions, children, crumbs }: { active: string; title: string; subtitle?: string; actions?: React.ReactNode; children: React.ReactNode; crumbs?: [string, string?][] }) {
   const { palette, setPalette, dark, setDark, notifs, markRead, expert, setExpert, role, setRole } = useStore(); const { lang, setLang, t } = useLang();
+  const lastFocus = useRef<HTMLElement | null>(null);
+  useEffect(() => { const f = (e: FocusEvent) => { const t = e.target as HTMLElement; if (t && t !== document.body && !t.closest?.("[role=dialog]")) lastFocus.current = t; }; document.addEventListener("focusin", f); return () => document.removeEventListener("focusin", f); }, []);
+  const wasOpen = useRef(false); useEffect(() => { if (palette) wasOpen.current = true; else if (wasOpen.current) { wasOpen.current = false; const el = lastFocus.current; setTimeout(() => { if (el && document.contains(el)) el.focus(); }, 0); } }, [palette]);
   const router = useRouter(); useEffect(() => { const h = () => setAi(true); window.addEventListener("tc-ask", h); return () => window.removeEventListener("tc-ask", h); }, []);
   const [mob, setMob] = useState(false); const [np, setNp] = useState(false); const [ai, setAi] = useState(false); const [collapsed, setCollapsed] = useState(false);
   useEffect(() => { const h = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette(true); } if (e.key === "Escape") { setPalette(false); setNp(false); }
@@ -59,7 +63,7 @@ export function Shell({ active, title, subtitle, actions, children, crumbs }: { 
           <PopoverContent align="end" className="w-80 p-4"><p className="text-sm font-semibold">How much to show</p><p className="mb-3 text-xs text-muted-foreground">One setting for the menu, table columns and help guides. Nothing is deleted.</p>
             <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1" role="group" aria-label="Detail level">{([[false, "Simple", "Fewer columns, guides on"], [true, "Expert", "All columns, guides off"]] as const).map(([v, l, d]) => <button key={l} aria-pressed={expert === v} onClick={() => setExpert(v)} className={cn("rounded-lg px-2 py-1.5 text-left text-xs", expert === v ? "bg-card font-semibold text-primary shadow-sm" : "text-muted-foreground")}>{l}<span className="block text-[11px] font-normal">{d}</span></button>)}</div>
             <p className="mb-1.5 mt-4 text-xs font-semibold">Menu for my job</p><div className="grid grid-cols-2 gap-1.5" role="group" aria-label="Menu for my job">{ROLES.map(r => <button key={r} aria-pressed={role === r} onClick={() => setRole(r)} className={cn("rounded-lg border px-2 py-1.5 text-xs", role === r ? "border-primary bg-accent font-semibold text-primary" : "border-border hover:bg-muted")}>{r === "Everyone" ? "All jobs" : r}</button>)}</div>
-            <p className="mb-1.5 mt-4 text-xs font-semibold">Language · භාෂාව · மொழி</p><div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Language">{LANGS.map(([k, l]) => <button key={k} lang={k} aria-pressed={lang === k} onClick={() => setLang(k)} className={cn("rounded-lg border px-2 py-1.5 text-xs", lang === k ? "border-primary bg-accent font-semibold text-primary" : "border-border hover:bg-muted")}>{l}</button>)}</div>
+            <p className="mb-1.5 mt-4 text-xs font-semibold">Menu language (beta) · භාෂාව · மொழி</p><div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Menu language (beta)">{LANGS.map(([k, l]) => <button key={k} lang={k} aria-pressed={lang === k} onClick={() => setLang(k)} className={cn("rounded-lg border px-2 py-1.5 text-xs", lang === k ? "border-primary bg-accent font-semibold text-primary" : "border-border hover:bg-muted")}>{l}</button>)}</div><p className="mt-1.5 text-[11px] leading-4 text-muted-foreground" id="lang-note">Beta: translates the menu, page titles and the main buttons. Most page text is still in English.</p>
             <p className="mt-3 text-xs text-muted-foreground">{expert ? "Expert shows every page." : role === "Everyone" ? "Showing all pages." : `Showing ${flat.filter(f => showInMenu(f.k, role, false)).length} of ${flat.length} pages.`}</p></PopoverContent></Popover>
           <button aria-label="Toggle dark mode" onClick={() => setDark(!dark)} className="rounded-full p-2 text-muted-foreground hover:bg-muted">{dark ? <Sun size={18} /> : <Moon size={18} />}</button>
           <button aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"} onClick={() => setNp(!np)} className="relative rounded-full p-2 text-muted-foreground hover:bg-muted"><Bell size={18} />{unread > 0 && <span data-testid="notif-badge" className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-background">{unread}</span>}</button>
@@ -92,14 +96,14 @@ function Palette({ onClose }: { onClose: () => void }) {
     { label: "Start here: what do you want to do?", run: () => go("Start here", "/start") },
     { label: dark ? "Switch to light mode" : "Switch to dark mode", run: () => { setDark(!dark); onClose(); } },
     { label: expert ? "Switch to Simple" : "Switch to Expert", run: () => { setExpert(!expert); onClose(); } },
-    { label: "Language: English", run: () => { setLang("en"); onClose(); } }, { label: "Language: සිංහල (Sinhala)", run: () => { setLang("si"); onClose(); } }, { label: "Language: தமிழ் (Tamil)", run: () => { setLang("ta"); onClose(); } },
+    { label: "Menu language (beta): English", run: () => { setLang("en"); onClose(); } }, { label: "Menu language (beta): සිංහල (Sinhala)", run: () => { setLang("si"); onClose(); } }, { label: "Menu language (beta): தமிழ் (Tamil)", run: () => { setLang("ta"); onClose(); } },
     { label: "Show keyboard shortcuts", k: "?", run: () => { onClose(); setTimeout(() => window.dispatchEvent(new Event("tc-shortcuts")), 0); } },
   ];
   const recs = [...db.shipments.map(s => ({ label: s.ref, sub: `Shipment · ${s.doc} · ${s.consignee}`, href: `/shipments/${s.ref}` })), ...db.salesOrders.map(s => ({ label: s.ref, sub: `Export order · ${s.buyer}`, href: `/manufacturing/orders/${s.ref}` })), ...db.customers.map(c => ({ label: c.name, sub: `Customer · ${c.code}`, href: "/master-data?tab=customers" })), ...db.pallets.map(p => ({ label: p.sscc, sub: `Pallet barcode · ${p.so}`, href: "/manufacturing/palletising" })), ...db.invoices.map(v => ({ label: v.ref, sub: `Invoice · ${v.customer}`, href: "/billing" }))];
   const item = "flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground";
   void setPalette;
-  return <div className="fixed inset-0 z-[70] flex items-start justify-center bg-black/50 px-3 pt-24 animate-in fade-in-0 duration-150" onClick={onClose}><div className="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-card shadow-2xl animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
-    <Cmd label="Command menu" loop onKeyDown={e => { if (e.key === "Escape") onClose(); }}>
+  return <D.Root open onOpenChange={o => { if (!o) onClose(); }}><D.Portal><D.Overlay className="fixed inset-0 z-[70] bg-black/50 animate-in fade-in-0 duration-150" /><D.Content aria-describedby={undefined} onCloseAutoFocus={e => e.preventDefault()} className="fixed left-1/2 top-24 z-[71] w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-card shadow-2xl animate-in zoom-in-95 duration-200"><D.Title className="sr-only">Command menu</D.Title>
+    <Cmd label="Command menu" loop>
       <div className="flex items-center gap-2 border-b border-border px-4"><Search size={16} className="text-muted-foreground" /><Cmd.Input autoFocus aria-label="Command palette search" value={q} onValueChange={setQ} placeholder="Type a command, a page, or a reference…" className="w-full bg-transparent py-3 text-sm outline-none" /><KBD k="Esc" /></div>
       <Cmd.List className="max-h-[22rem] overflow-y-auto p-1.5">
         <Cmd.Empty className="px-4 py-6 text-center text-sm text-muted-foreground">No match. <button className="text-primary underline" onClick={() => { onClose(); window.dispatchEvent(new CustomEvent("tc-ask", { detail: q })); }}>Ask Ternary “{q}”</button></Cmd.Empty>
@@ -110,7 +114,7 @@ function Palette({ onClose }: { onClose: () => void }) {
       </Cmd.List>
       <p className="flex flex-wrap gap-3 border-t border-border px-4 py-2 text-[11px] text-muted-foreground"><span><KBD k="↑↓" /> move</span><span><KBD k="Enter" /> open</span><span><KBD k={mac ? "⌘K" : "Ctrl K"} /> or <KBD k="/" /> open this</span><span><KBD k="?" /> all shortcuts</span></p>
     </Cmd>
-  </div></div>;
+  </D.Content></D.Portal></D.Root>;
 }
 function Shortcuts() {
   const [open, setOpen] = useState(false);

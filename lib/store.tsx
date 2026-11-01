@@ -8,11 +8,13 @@ export type CustomField = { k: string; label: string; type: "text" | "number" | 
 export type SavedView = { id: string; name: string; q: string; status: string; sort?: { k: string; dir: 1 | -1 } | null; hidden: string[]; layout: "table" | "cards" };
 const emptyExtra = (): Extra => ({ notes: [], files: [], overrides: {}, tags: [] });
 type Toast = { id: number; msg: string; tone: "ok" | "err" | "info" };
+export const permRole = (): string => { try { const v = localStorage.getItem("tc-v4-perm-role"); return v ? JSON.parse(v) : "Operations manager"; } catch { return "Operations manager"; } };
+export const canDelete = (r: string) => r === "Admin";
 export type Ev = { id: number; ref: string; text: string; at: string; actor: string; source: string };
 type Notif = { id: number; text: string; at: string; read: boolean; href?: string };
 type Ctx = {
   db: DB; ready: boolean;
-  add: (k: keyof DB, row: Omit<Row, "id">) => Row; update: (k: keyof DB, id: string, patch: Partial<Row>) => void; remove: (k: keyof DB, id: string) => void;
+  add: (k: keyof DB, row: Omit<Row, "id">) => Row; update: (k: keyof DB, id: string, patch: Partial<Row>) => void; remove: (k: keyof DB, id: string) => boolean;
   setMany: (k: keyof DB, rows: Row[]) => void;
   reset: () => void; toast: (msg: string, tone?: Toast["tone"]) => void; toasts: Toast[];
   notifs: Notif[]; notify: (text: string, href?: string) => void; markRead: () => void;
@@ -57,10 +59,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const dark = resolvedTheme === "dark"; const setDarkS = (d: boolean) => setTheme(d ? "dark" : "light");
   const toast = useCallback((msg: string, tone: Toast["tone"] = "ok") => { if (tone === "err") sonner.error(msg); else if (tone === "info") sonner.info(msg); else sonner.success(msg); }, []);
   const notify = useCallback((text: string, href?: string) => setNotifs(n => [{ id: Date.now(), text, at: new Date().toTimeString().slice(0, 5), read: false, href }, ...n]), []);
-  const log = useCallback((ref: string, text: string, source = "user") => setEvents(e => [{ id: Date.now() + Math.random(), ref, text, at: new Date().toISOString(), actor: "Nimal Perera", source }, ...e].slice(0, 500)), []);
+  const log = useCallback((ref: string, text: string, source = "user") => setEvents(e => [{ id: Date.now() + Math.random(), ref, text, at: new Date().toISOString(), actor: `Nimal Perera (${permRole()})`, source }, ...e].slice(0, 500)), []);
   const add = (k: keyof DB, row: Omit<Row, "id">) => { const nr = { ...row, id: `${Date.now()}${Math.floor(Math.random() * 1000)}` } as Row; setDb(d => ({ ...d, [k]: [nr, ...d[k]] })); log(String(row.ref ?? row.code ?? row.shipment ?? row.name ?? k), `Created ${String(k)} ${String(row.ref ?? row.code ?? row.name ?? "")}`); return nr; };
   const update = (k: keyof DB, id: string, patch: Partial<Row>) => { const r = (db[k] as Row[]).find(x => x.id === id); if (r) log(r.ref ?? r.code ?? r.name ?? String(k), `${String(k)} ${r.ref ?? r.code ?? r.name ?? ""} updated: ${Object.entries(patch).map(([a, b]) => `${a}=${b}`).join(", ")}`); setDb(d => ({ ...d, [k]: d[k].map(r => r.id === id ? { ...r, ...patch } as Row : r) })); };
-  const remove = (k: keyof DB, id: string) => setDb(d => ({ ...d, [k]: d[k].filter(r => r.id !== id) }));
+  const remove = (k: keyof DB, id: string): boolean => { if (!canDelete(permRole())) return false; const r = (db[k] as Row[]).find(x => x.id === id); setDb(d => ({ ...d, [k]: d[k].filter(r => r.id !== id) })); if (r) { const ref = String(r.ref ?? r.code ?? r.name ?? r.shipment ?? id); log(ref, `Deleted ${String(k)} record ${ref}`, "delete"); } return true; };
   const setMany = (k: keyof DB, rows: Row[]) => setDb(d => ({ ...d, [k]: rows }));
   const patchExtra = useCallback((key: string, f: (e: Extra) => Extra) => setExtra(x => ({ ...x, [key]: f(x[key] ?? emptyExtra()) })), []);
   const getExtra = (key: string) => extra[key] ?? emptyExtra();

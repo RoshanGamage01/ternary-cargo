@@ -12,9 +12,9 @@ test("booklet PDF linked from Help, glossary and Incoterm help", async ({ page, 
 });
 
 test("design 7: ? tooltip for other names, ⓘ Estimate label", async ({ page }) => {
-  await go(page, "bookings");
+  await go(page, "exceptions");
   const q = page.getByRole("button", { name: "Other names for this page" });
-  if (await q.count()) { await q.click(); await expect(page.getByText("Also called", { exact: true })).toBeVisible(); }
+  await q.click(); await expect(page.getByText("Also called", { exact: true })).toBeVisible(); await expect(page.getByRole("dialog").getByText("Exceptions")).toBeVisible();
   await expect(page.getByText(/also called/)).toHaveCount(0);
   await go(page, "quotations");
   await expect(page.getByText("Prototype estimate", { exact: true })).toHaveCount(0);
@@ -25,10 +25,11 @@ test("design 10: badge, breadcrumb, active nav, KPI delta + sparkline", async ({
   await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Overview");
   await expect(page.getByRole("navigation", { name: "Breadcrumb" })).not.toContainText("Good afternoon");
   const cur = page.locator("aside a[aria-current=page]"); await expect(cur).toHaveClass(/bg-primary\/10/);
-  const badge = page.getByTestId("notif-badge"); if (await badge.count()) { const b = (await badge.boundingBox())!; const bell = (await page.getByRole("button", { name: /^Notifications/ }).boundingBox())!; expect(b.y).toBeLessThan(bell.y + 4); }
-  await expect(page.getByTestId("kpi-delta").first()).toHaveAttribute("aria-label", /(Up|Down|No change) \d+% on last week/);
-  await expect(page.getByRole("img", { name: /trend, last 8 weeks/ }).first()).toBeVisible();
-  await page.getByRole("link", { name: /^Active shipments: \d+\. Open/ }).click(); await expect(page).toHaveURL(/\/shipments$/);
+  const badge = page.getByTestId("notif-badge"); await expect(badge).toBeVisible(); { const b = (await badge.boundingBox())!; const bell = (await page.getByRole("button", { name: /^Notifications/ }).boundingBox())!; expect(b.y).toBeLessThan(bell.y + 4); }
+  await expect(page.getByTestId("kpi-delta").first()).toHaveText(/(up|down) \d+% on last week|no change on last week/);
+  await expect(page.getByText("Sample trend").first()).toBeVisible();
+  await expect(page.getByRole("img", { name: /sample trend, last 8 weeks/ }).first()).toBeVisible();
+  await page.getByRole("link", { name: /^Active shipments \d+, (up|down) \d+% on last week.*sample trend.*Open$/ }).click(); await expect(page).toHaveURL(/\/shipments$/);
 });
 
 test("mobile bottom tab bar", async ({ page }) => {

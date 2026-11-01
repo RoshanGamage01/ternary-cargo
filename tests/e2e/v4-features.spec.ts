@@ -108,10 +108,12 @@ test("pallet labels and gate pass are real PDFs", async ({ page }) => {
   await go(page, "manufacturing/serialisation"); await page.getByRole("button", { name: "Generate labels" }).click();
   await go(page, "manufacturing/palletising"); await page.getByRole("button", { name: /Auto-build all/ }).click();
   const [d] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Pallet labels (PDF)" }).click()]);
-  expect(fs.readFileSync((await d.path())!, "latin1")).toContain("SSCC \\(00\\)");
+  const pdf = fs.readFileSync((await d.path())!, "latin1");
+  expect(pdf).toContain("/Filter /DCTDecode"); expect(pdf).toContain("/MediaBox [0 0 298 420]"); expect(pdf).not.toContain("\\(00\\) \\(00\\)");
   await go(page, "release");
-  const gp = page.getByRole("button", { name: /^Gate pass / }).first();
-  if (await gp.count()) { const [g] = await Promise.all([page.waitForEvent("download"), gp.click()]); expect(fs.readFileSync((await g.path())!, "latin1")).toContain("GATE PASS"); }
+  const gp = page.getByRole("button", { name: "Gate pass DO-2026-0429" });
+  await expect(gp).toBeVisible();
+  const [g] = await Promise.all([page.waitForEvent("download"), gp.click()]); expect(fs.readFileSync((await g.path())!, "latin1")).toContain("GATE PASS DO-2026-0429");
 });
 
 test("QA-14: tally on a 390px phone uses cards with weight and condition visible", async ({ browser }) => {

@@ -106,14 +106,14 @@ export const GUIDES: Record<string, Guide> = {
   settings: { title: "Settings", why: "Users, permissions, your own fields, plan and demo data.", steps: ["Invite users and set roles", "Add custom fields for any record type", "Reset the demo whenever you like"], terms: ["Custom field"] },
 };
 export function GuideBanner({ k }: { k: string }) {
-  const { dismissed, dismiss, expert } = useStore(); const g = GUIDES[k]; const [open, setOpen] = useState(false);
+  const { dismissed, dismiss, expert } = useStore(); const g = GUIDES[k]; const [open, setOpen] = useState(false); const [steps, setSteps] = useState(false);
   if (!g) return null;
   const hidden = dismissed.includes(k) || expert;
   return <>
-    {!hidden && <div className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-gradient-to-r from-accent/70 to-card p-4 no-print" role="note" aria-label="How this works">
-      <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/15 text-primary"><PlayCircle size={20} /></div>
-      <p className="shrink-0 text-sm font-semibold">How this page works</p>
-      <ol className="flex flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">{g.steps.map((s, i) => <li key={s} className="flex max-w-[190px] items-start gap-2 text-xs text-muted-foreground"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-card text-[11px] font-semibold text-primary ring-1 ring-border">{i + 1}</span>{s}</li>)}</ol>
+    {!hidden && <div data-testid="guide-banner" className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-border bg-gradient-to-r from-accent/70 to-card p-3 no-print sm:mb-6 sm:gap-4 sm:p-4" role="note" aria-label="How this works">
+      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/15 text-primary sm:h-10 sm:w-10"><PlayCircle size={18} /></div>
+      <p className="shrink-0 text-sm font-semibold">How this page works</p><button type="button" className="text-xs font-medium text-primary underline underline-offset-2 sm:hidden" aria-expanded={steps} onClick={() => setSteps(!steps)}>{steps ? "Hide steps" : `See ${g.steps.length} steps`}</button>
+      <ol className={cn("basis-full flex-col gap-2 sm:flex sm:basis-auto sm:flex-1 sm:flex-row sm:flex-wrap sm:gap-3", steps ? "flex" : "hidden")}>{g.steps.map((s, i) => <li key={s} className="flex items-start gap-2 sm:max-w-[190px] text-xs text-muted-foreground"><span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-card text-[11px] font-semibold text-primary ring-1 ring-border">{i + 1}</span>{s}</li>)}</ol>
       <div className="flex gap-1"><button onClick={() => setOpen(true)} className="rounded-lg px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10">Show me how</button><button aria-label="Hide guide" onClick={() => dismiss(k)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><X size={16} /></button></div>
     </div>}
     {hidden && <button onClick={() => setOpen(true)} className="mb-4 inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground no-print"><HelpCircle size={14} />Need a hand? <span className="font-medium text-primary underline underline-offset-2">Show me how</span></button>}
