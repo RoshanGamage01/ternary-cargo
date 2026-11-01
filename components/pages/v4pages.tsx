@@ -217,14 +217,17 @@ const CHAPTERS: [string, string, React.ReactNode][] = [
   ["places", "4. Warehouses and unloading (CFS, devanning)", <p key="p">A <b>CFS</b> (container freight station) is a warehouse near the port where shared containers are packed and unpacked. <b>Devanning</b> simply means unloading a container and counting what came out.</p>],
   ["containers", "5. Container numbers and seals", <p key="n">A container number is 4 letters and 7 digits, e.g. MSKU 774120 6. The last digit is a check digit worked out from the others (ISO 6346), so a typing mistake is caught at once. Seals carry 2–4 letters and 5–10 digits, e.g. ML-5521093.</p>],
 ];
+const B = "/booklet/Ternary-Cargo-Beginners-Booklet.pdf";
+export function BookletLink({ page, label = "Beginner's booklet (PDF)" }: { page?: number; label?: string }) { return <a href={page ? `${B}#page=${page}` : B} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5">📘 {label}</a>; }
 export function HelpBooklet({ q }: { q: R }) {
   const ch = q.ch ?? "incoterms";
-  return <Shell active="help" title="Help booklet" subtitle="Short chapters that explain the trade words used in Ternary, in plain English.">
+  return <Shell active="help" title="Help booklet" subtitle="Short chapters that explain the trade words used in Ternary, in plain English." actions={<BookletLink />}>
+    <p className="mb-4 text-sm text-muted-foreground">Want the full guide? The 59-page <a className="text-primary underline" href={B} target="_blank" rel="noopener">Beginner&apos;s booklet (PDF)</a> covers everything step by step. {ch === "incoterms" && <a className="text-primary underline" href={`${B}#page=27`} target="_blank" rel="noopener">Incoterms are chapter 8, from page 27.</a>}</p>
     <div className="grid gap-4 lg:grid-cols-4"><Card className="h-fit p-3"><nav aria-label="Chapters" className="space-y-1">{CHAPTERS.map(([k, t]) => <Link key={k} href={`/help?ch=${k}`} aria-current={ch === k ? "page" : undefined} className={cn("block rounded-lg px-3 py-2 text-sm no-underline", ch === k ? "bg-accent font-semibold text-primary" : "hover:bg-muted")}>{t}</Link>)}</nav><Link href="/glossary" className="mt-2 flex items-center gap-2 px-3 py-2 text-sm text-primary"><BookOpen size={14} />Full glossary</Link></Card>
       <Card className="p-6 lg:col-span-3"><h2 className="mb-3 text-xl font-semibold">{CHAPTERS.find(c => c[0] === ch)?.[1]}</h2><div className="text-sm leading-6">{CHAPTERS.find(c => c[0] === ch)?.[2]}</div></Card></div>
   </Shell>;
 }
 export function IncotermHelp({ value }: { value: string }) {
   const t = INCOTERMS.find(x => x[0] === value);
-  return <p className="mt-1 text-xs text-muted-foreground" role="note">{t ? <><b>{t[0]} · {t[1]}:</b> {t[2]} </> : "Pick the rule agreed with the buyer. "}<Link href="/help?ch=incoterms" className="text-primary underline underline-offset-2">Which one? Read the Incoterms chapter</Link></p>;
+  return <p className="mt-1 text-xs text-muted-foreground" role="note">{t ? <><b>{t[0]} · {t[1]}:</b> {t[2]} </> : "Pick the rule agreed with the buyer. "}<Link href="/help?ch=incoterms" className="text-primary underline underline-offset-2">Which one? Read the Incoterms chapter</Link> · <a href={`${B}#page=27`} target="_blank" rel="noopener" className="text-primary underline underline-offset-2">Booklet chapter 8 (PDF, p27)</a></p>;
 }

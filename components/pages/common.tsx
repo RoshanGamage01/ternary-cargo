@@ -15,7 +15,7 @@ export function EtaCell({ s }: { s: Row }) {
   return <div className="whitespace-nowrap text-xs"><p><span className="text-muted-foreground">Carrier</span> {fmtDate(s.eta)}</p><p className={cn("font-medium tabular-nums", p.delay > 0.5 ? "text-warning" : "text-success")}><span className="font-normal text-muted-foreground">P50</span> {fmtDate(p.predicted)} <span className="font-normal text-muted-foreground">P90 {fmtDate(p.p90).slice(0, 6)}</span></p></div>;
 }
 export const RiskCell = ({ s }: { s: Row }) => { const p = predictEta(s); return <Badge tone={riskTone(p.risk)}>{p.risk}{p.delay ? ` +${p.delay}d` : ""}</Badge>; };
-export const ProtoTag = () => <span className="rounded bg-warning/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-warning">Prototype estimate</span>;
+export const ProtoTag = () => <span title="A rough estimate for this prototype, not a real figure" aria-label="Estimate: a rough prototype figure, not real" className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground"><span aria-hidden>ⓘ</span>Estimate</span>;
 export function EtaPanel({ s }: { s: Row }) {
   const p = predictEta(s);
   const total = p.factors.reduce((a, f) => a + Math.abs(f.impact), 0) || 1;

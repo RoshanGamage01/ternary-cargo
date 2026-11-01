@@ -1,4 +1,5 @@
 "use client";
+import { BookletLink } from "./v4pages";
 import { useLang } from "@/lib/i18n";
 import Link from "next/link";
 import { useState } from "react";
@@ -52,7 +53,7 @@ export function Start() {
 }
 export function Glossary() {
   const [q, setQ] = useState(""); const list = Object.entries(GLOSSARY).filter(([k, v]) => (k + v).toLowerCase().includes(q.toLowerCase())).sort(([a], [b]) => a.localeCompare(b));
-  return <Shell active="glossary" title="Glossary"><div className="mb-5 flex max-w-md items-center gap-2 rounded-xl border border-input bg-card px-3 py-2"><Search size={16} className="text-muted-foreground" /><input aria-label="Search glossary" value={q} onChange={e => setQ(e.target.value)} placeholder="Search a word, e.g. demurrage" className="w-full bg-transparent text-sm outline-none" /></div>
+  return <Shell active="glossary" title="Glossary" actions={<BookletLink />}><div className="mb-5 flex max-w-md items-center gap-2 rounded-xl border border-input bg-card px-3 py-2"><Search size={16} className="text-muted-foreground" /><input aria-label="Search glossary" value={q} onChange={e => setQ(e.target.value)} placeholder="Search a word, e.g. demurrage" className="w-full bg-transparent text-sm outline-none" /></div>
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{list.map(([k, v]) => <Card key={k} className="p-5"><p className="font-display font-semibold">{k}</p><p className="mt-1 text-sm text-muted-foreground">{v}</p></Card>)}</div>{list.length === 0 && <p className="text-sm text-muted-foreground">No word matches “{q}”.</p>}</Shell>;
 }
 const TYPES: CustomField["type"][] = ["text", "number", "date", "select", "yes/no"];
